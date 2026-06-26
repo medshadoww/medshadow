@@ -48,6 +48,9 @@ label{display:block;font-size:13px;font-weight:600;color:#475569;margin-bottom:5
 .nav-logo-text{font-family:'Libre Baskerville',serif;font-size:1.25rem;color:#fff;font-weight:700}
 .nav-logo-text span{color:var(--teal)}
 .nav-actions{display:flex;align-items:center;gap:10px}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-link{color:rgba(255,255,255,.7);font-size:14px;font-weight:600;cursor:pointer;padding:8px 12px;border-radius:6px;transition:all .2s}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,.08)}
 .nav-user{display:flex;align-items:center;gap:10px}
 .avatar{width:36px;height:36px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;cursor:pointer;flex-shrink:0}
 .sidebar{width:230px;background:var(--navy);padding:1.5rem 0;flex-shrink:0;min-height:calc(100vh - 64px)}
@@ -106,16 +109,19 @@ tr:hover td{background:#FAFBFC}
 .hidden{display:none!important}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fade-in{animation:fadeIn .3s ease}
-@media(max-width:768px){.grid2,.grid3,.grid4{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.sidebar{width:200px}}
+@media(max-width:768px){.grid2,.grid3,.grid4{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.sidebar{width:200px}.nav-links{display:none}}
 </style>
 </head>
 <body>
 <div id="app">
   <!-- Immediate landing page — no JS needed to show this -->
   <nav class="nav">
-    <div class="nav-logo">
+    <div class="nav-logo" onclick="showPage('landing')">
       <div class="nav-logo-mark">🩺</div>
       <span class="nav-logo-text">Med<span>Shadow</span></span>
+    </div>
+    <div class="nav-links">
+      <span class="nav-link" onclick="showPage('partners')">Partner Physicians</span>
     </div>
     <div class="nav-actions">
       <button class="btn btn-ghost btn-sm" style="color:#fff;border-color:rgba(255,255,255,.4)" onclick="showPage('login')">Sign In</button>
@@ -149,7 +155,6 @@ tr:hover td{background:#FAFBFC}
 // ─────────────────────────────────────────────
 var SUPABASE_URL      = 'https://ymgzjrvoffppllxnditj.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltZ3pqcnZvZmZwcGxseG5kaXRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTYxNTAsImV4cCI6MjA5NDE3MjE1MH0.eMYDBaZm4GyMO3tAyJV8FGPzMQ7yCqDwGfgwTXab8A0';
-var STRIPE_PUB_KEY    = 'pk_test_51TWIsTCKxTDGu4A0dD9po22AJDpf2DpMUg1WXU3fndqtd4XGSnU2cCXPt9IbujZRYvS77uy30jOdV9Qi39ekYrld00ZceOAyAH';
 var ADMIN_EMAIL       = 'medshadoww@gmail.com';
 
 // ─────────────────────────────────────────────
@@ -213,10 +218,39 @@ async function notifyAdmin(userType, name, email, institution) {
 }
 
 // ─────────────────────────────────────────────
+// PARTNER PHYSICIANS — manual list (curated by admin)
+// Add a doctor here once they agree to be listed publicly.
+// This is separate from the Supabase `doctors` table used for
+// actual shadowing scheduling — this list is purely for marketing
+// / visibility on the public Partner Physicians page.
+// ─────────────────────────────────────────────
+var PARTNER_PHYSICIANS = [
+  {
+    name: 'Dr. Jane Smith',
+    practice: 'Example Direct Primary Care',
+    specialty: 'Family Medicine',
+    city: 'Raleigh, NC',
+    emoji: '🩺',
+    quote: 'Mentoring pre-med students is one of the best parts of running an independent practice.',
+    url: '#'
+  },
+  {
+    name: 'Dr. John Doe',
+    practice: 'Example Health DPC',
+    specialty: 'Internal Medicine',
+    city: 'Durham, NC',
+    emoji: '🩺',
+    quote: '',
+    url: '#'
+  }
+  // Add more partner physicians here as they join.
+];
+
+// ─────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────
 var S = {
-  db: null, stripe: null,
+  db: null,
   page: 'landing', tab: '',
   user: null, profile: null, role: null,
   regStep: 1, regRole: 'student', regData: {},
@@ -267,6 +301,7 @@ function render() {
   void pc.offsetWidth;
   switch(S.page) {
     case 'landing':  pc.innerHTML = pageLanding(); break;
+    case 'partners': pc.innerHTML = pagePartners(); break;
     case 'login':    pc.innerHTML = pageLogin(); break;
     case 'register': pc.innerHTML = pageRegister(); break;
     case 'student':  pc.innerHTML = pageDash('student'); break;
@@ -275,41 +310,6 @@ function render() {
     default:         pc.innerHTML = pageLanding();
   }
   updateNav();
-  // Payment disabled during free promo period — no Stripe mount needed
-}
-
-// Mount Stripe Elements card field into #stripe-card div
-function mountStripeCard() {
-  var el = $('stripe-card');
-  if (!el) return;
-  if (el.dataset.mounted === '1') return; // already mounted
-  if (!S.stripe) {
-    // Stripe not loaded yet, retry in 300ms
-    setTimeout(mountStripeCard, 300);
-    return;
-  }
-  el.dataset.mounted = '1';
-  var elements = S.stripe.elements();
-  S._cardEl = elements.create('card', {
-    style: {
-      base: {
-        fontFamily: "'Plus Jakarta Sans', sans-serif",
-        fontSize: '15px',
-        color: '#1E293B',
-        '::placeholder': { color: '#94A3B8' }
-      },
-      invalid: { color: '#DC2626' }
-    },
-    hidePostalCode: true
-  });
-  S._cardEl.mount('#stripe-card');
-  S._cardEl.on('change', function(e) {
-    var errEl = $('stripe-err');
-    if (errEl) {
-      if (e.error) { errEl.style.display = 'block'; errEl.textContent = e.error.message; }
-      else { errEl.style.display = 'none'; }
-    }
-  });
 }
 
 function updateNav() {
@@ -362,7 +362,49 @@ function pageLanding() {
       <button class="btn btn-lg" style="background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.4)" onclick="showPage(\'login\')">Sign In</button>\
     </div>\
   </section>\
+  <footer style="background:#071A2E;padding:1.5rem 2rem;text-align:center;color:rgba(255,255,255,.4);font-size:13px">© 2026 MedShadow · '+ADMIN_EMAIL+' · <span style="color:#0098B4;cursor:pointer" onclick="showPage(\'partners\')">Partner Physicians</span></footer>';
+}
+
+// ─────────────────────────────────────────────
+// PARTNER PHYSICIANS PAGE
+// ─────────────────────────────────────────────
+function pagePartners() {
+  var list = PARTNER_PHYSICIANS || [];
+  return '<section style="background:linear-gradient(135deg,#071A2E 0%,#0D3259 60%,#0F4C75 100%);padding:4rem 2rem 3.5rem;text-align:center">\
+    <div style="max-width:700px;margin:0 auto">\
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(0,152,180,.2);border:1px solid rgba(0,152,180,.4);padding:6px 14px;border-radius:20px;color:#0098B4;font-size:13px;font-weight:600;margin-bottom:1.25rem">🤝 Partner Physicians</div>\
+      <h1 style="font-size:2.4rem;color:#fff;line-height:1.2;margin-bottom:1rem">The Practices Opening Their Doors to the Next Generation</h1>\
+      <p style="color:rgba(255,255,255,.7);font-size:1.05rem;line-height:1.7">MedShadow partners with independent and Direct Primary Care physicians who believe in mentorship — giving students real, unhurried access to clinical medicine.</p>\
+    </div>\
+  </section>\
+  <section style="background:#fff;padding:4rem 2rem;min-height:40vh">\
+    <div style="max-width:1000px;margin:0 auto">\
+      '+(list.length===0 ?
+        '<div style="text-align:center;padding:3rem;color:#475569"><div style="font-size:2.5rem;margin-bottom:1rem">🩺</div><h3 style="font-family:serif;margin-bottom:.5rem;color:#0A2540">Our partner network is growing</h3><p>Check back soon to see the physicians mentoring MedShadow students.</p></div>'
+        :
+        '<div class="grid2">'+list.map(partnerCard).join('')+'</div>'
+      )+'\
+      <div style="text-align:center;margin-top:3rem;padding-top:2.5rem;border-top:1px solid #E2E8F0">\
+        <h3 style="color:#0A2540;margin-bottom:.5rem">Is your practice interested in mentoring?</h3>\
+        <p style="color:#475569;margin-bottom:1.5rem">Join our network of partner physicians and help shape the next generation of doctors.</p>\
+        <button class="btn btn-primary btn-lg" onclick="S.regRole=\'doctor\';S.regStep=1;showPage(\'register\')">Join as Physician</button>\
+      </div>\
+    </div>\
+  </section>\
   <footer style="background:#071A2E;padding:1.5rem 2rem;text-align:center;color:rgba(255,255,255,.4);font-size:13px">© 2026 MedShadow · '+ADMIN_EMAIL+'</footer>';
+}
+
+function partnerCard(p) {
+  return '<div class="card" style="display:flex;gap:14px;align-items:flex-start">\
+    <div style="width:54px;height:54px;border-radius:12px;background:#E0F5FA;display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0">'+(p.emoji||'🩺')+'</div>\
+    <div style="flex:1;min-width:0">\
+      <h3 style="font-size:15px;font-weight:700;color:#0A2540">'+p.name+'</h3>\
+      <p style="font-size:13px;color:#475569;margin-top:2px">'+(p.practice||'')+'</p>\
+      <p style="font-size:12px;color:#94A3B8;margin-top:2px">'+(p.specialty||'')+(p.city?' · '+p.city:'')+'</p>\
+      '+(p.quote?'<p style="font-size:13px;color:#475569;line-height:1.5;margin-top:10px;font-style:italic">"'+p.quote+'"</p>':'')+'\
+      '+(p.url&&p.url!=='#'?'<a href="'+p.url+'" target="_blank" rel="noopener noreferrer" style="font-size:13px;color:#0098B4;font-weight:600;display:inline-block;margin-top:10px">Visit practice →</a>':'')+'\
+    </div>\
+  </div>';
 }
 
 // ─────────────────────────────────────────────
@@ -2338,7 +2380,7 @@ function startApp() {
   // Show landing immediately
   render();
 
-  // Load Supabase then Stripe
+  // Load Supabase
   loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', function() {
     try {
       S.db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -2391,10 +2433,6 @@ function startApp() {
         if (event==='SIGNED_OUT'){S.user=null;S.profile=null;S.role=null;showPage('landing');}
       });
     } catch(e) { console.warn('Supabase init error:',e); }
-  });
-
-  loadScript('https://js.stripe.com/v3/', function() {
-    try { S.stripe = Stripe(STRIPE_PUB_KEY); } catch(e) { console.warn('Stripe init error:',e); }
   });
 }
 
