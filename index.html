@@ -1,0 +1,2447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MedShadow</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#F0F4F8;color:#1E293B;min-height:100vh}
+:root{
+  --navy:#0A2540;--teal:#0098B4;--teal-l:#E0F5FA;--teal-d:#007A91;
+  --green:#059669;--green-l:#D1FAE5;--red:#DC2626;--red-l:#FEE2E2;
+  --amber:#D97706;--amber-l:#FEF3C7;
+  --bg:#F0F4F8;--white:#fff;--gray:#F8FAFC;
+  --border:#E2E8F0;--text2:#475569;--text3:#94A3B8;
+  --shadow:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.1);
+}
+h1,h2,h3{font-family:'Libre Baskerville',serif;line-height:1.25}
+button{font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;border:none}
+input,select,textarea{font-family:'Plus Jakarta Sans',sans-serif;width:100%;padding:10px 14px;border:1.5px solid #CBD5E1;border-radius:8px;font-size:14px;background:#fff;color:#1E293B;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,152,180,.12)}
+textarea{resize:vertical;min-height:80px}
+label{display:block;font-size:13px;font-weight:600;color:#475569;margin-bottom:5px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:var(--teal);color:#fff}.btn-primary:hover{background:var(--teal-d)}
+.btn-outline{background:transparent;color:var(--teal);border:1.5px solid var(--teal)}.btn-outline:hover{background:var(--teal-l)}
+.btn-ghost{background:transparent;color:#475569;border:1.5px solid #CBD5E1}.btn-ghost:hover{background:#F8FAFC}
+.btn-danger{background:var(--red);color:#fff}
+.btn-success{background:var(--green);color:#fff}
+.btn-sm{padding:7px 14px;font-size:13px}
+.btn-lg{padding:14px 28px;font-size:16px}
+.btn-full{width:100%;justify-content:center}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-green{background:var(--green-l);color:var(--green)}
+.badge-teal{background:var(--teal-l);color:var(--teal-d)}
+.badge-amber{background:var(--amber-l);color:var(--amber)}
+.badge-red{background:var(--red-l);color:var(--red)}
+.badge-gray{background:#F1F5F9;color:#475569}
+.card{background:#fff;border-radius:12px;border:1px solid var(--border);box-shadow:var(--shadow);padding:1.5rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.nav{position:sticky;top:0;z-index:100;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:64px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.nav-logo{display:flex;align-items:center;gap:10px;cursor:pointer}
+.nav-logo-mark{width:36px;height:36px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.nav-logo-text{font-family:'Libre Baskerville',serif;font-size:1.25rem;color:#fff;font-weight:700}
+.nav-logo-text span{color:var(--teal)}
+.nav-actions{display:flex;align-items:center;gap:10px}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-link{color:rgba(255,255,255,.7);font-size:14px;font-weight:600;cursor:pointer;padding:8px 12px;border-radius:6px;transition:all .2s}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,.08)}
+.nav-user{display:flex;align-items:center;gap:10px}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;cursor:pointer;flex-shrink:0}
+.sidebar{width:230px;background:var(--navy);padding:1.5rem 0;flex-shrink:0;min-height:calc(100vh - 64px)}
+.sidebar-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.08em;padding:0 1.75rem;margin-bottom:.5rem}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:9px 1rem;border-radius:8px;margin:0 .75rem 2px;color:rgba(255,255,255,.65);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s}
+.sidebar-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.sidebar-item.active{background:rgba(0,152,180,.2);color:var(--teal)}
+.sidebar-section{margin-bottom:1.5rem}
+.layout{display:flex;min-height:calc(100vh - 64px)}
+.main{flex:1;padding:2rem;overflow-y:auto;min-width:0}
+.form-group{margin-bottom:1.2rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.divider{height:1px;background:var(--border);margin:1.5rem 0}
+.or-div{display:flex;align-items:center;gap:12px;color:var(--text3);font-size:13px;margin:1rem 0}
+.or-div::before,.or-div::after{content:'';flex:1;height:1px;background:var(--border)}
+.tabs{display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:1.5rem}
+.tab{padding:10px 16px;font-size:14px;font-weight:600;color:#475569;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;border-radius:4px 4px 0 0}
+.tab.active{color:var(--teal);border-bottom-color:var(--teal);background:var(--teal-l)}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.section-title{font-family:'Libre Baskerville',serif;font-size:1.3rem;color:#1E293B}
+.stat-card{background:#fff;border-radius:12px;border:1px solid var(--border);padding:1.25rem}
+.stat-val{font-size:2rem;font-weight:700;color:var(--navy);line-height:1}
+.stat-lbl{font-size:13px;color:#475569;font-weight:500;margin-top:4px}
+.stat-sub{font-size:12px;color:#94A3B8;margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;padding:10px 14px;font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.05em;background:#F8FAFC;border-bottom:1px solid var(--border)}
+td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFBFC}
+.upload-zone{border:2px dashed #CBD5E1;border-radius:12px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;background:#F8FAFC}
+.upload-zone:hover{border-color:var(--teal);background:var(--teal-l)}
+.alert{padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:1rem;display:flex;gap:10px}
+.alert-warn{background:var(--amber-l);color:var(--amber)}
+.alert-info{background:var(--teal-l);color:var(--teal-d)}
+.alert-danger{background:var(--red-l);color:var(--red)}
+.alert-success{background:var(--green-l);color:var(--green)}
+.sched-item{display:flex;gap:14px;padding:14px;background:#fff;border:1px solid var(--border);border-radius:12px;margin-bottom:10px}
+.sched-date{min-width:52px;text-align:center;background:var(--teal-l);border-radius:8px;padding:8px 6px}
+.progress-bar{background:var(--border);border-radius:20px;height:8px;overflow:hidden}
+.progress-fill{height:100%;border-radius:20px;background:var(--teal);transition:width .4s}
+.opp-card{background:#fff;border-radius:12px;border:1px solid var(--border);box-shadow:var(--shadow);padding:1.25rem;transition:box-shadow .2s,transform .2s}
+.opp-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.opp-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.course-card{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+.steps{display:flex;align-items:flex-start;margin-bottom:2rem}
+.step{display:flex;flex-direction:column;align-items:center;flex:1}
+.step-num{width:32px;height:32px;border-radius:50%;border:2px solid #CBD5E1;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#94A3B8;background:#fff;flex-shrink:0}
+.step.active .step-num{border-color:var(--teal);color:var(--teal);background:var(--teal-l)}
+.step.done .step-num{border-color:var(--green);background:var(--green);color:#fff}
+.step-lbl{font-size:12px;font-weight:600;color:#94A3B8;margin-top:5px;text-align:center}
+.step.active .step-lbl{color:var(--teal)}
+.step.done .step-lbl{color:var(--green)}
+.step-line{flex:1;height:2px;background:var(--border);margin-top:16px}
+.step.done+.step-line,.step.done .step-line{background:var(--green)}
+.payment-box{background:linear-gradient(135deg,#0A2540,#0D3259);border-radius:16px;padding:2rem;color:#fff;margin-bottom:1.5rem}
+.hidden{display:none!important}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .3s ease}
+@media(max-width:768px){.grid2,.grid3,.grid4{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.sidebar{width:200px}.nav-links{display:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Immediate landing page — no JS needed to show this -->
+  <nav class="nav">
+    <div class="nav-logo" onclick="showPage('landing')">
+      <div class="nav-logo-mark">🩺</div>
+      <span class="nav-logo-text">Med<span>Shadow</span></span>
+    </div>
+    <div class="nav-links">
+      <span class="nav-link" onclick="showPage('partners')">Partner Physicians</span>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-ghost btn-sm" style="color:#fff;border-color:rgba(255,255,255,.4)" onclick="showPage('login')">Sign In</button>
+      <button class="btn btn-primary btn-sm" onclick="showPage('register')">Get Started</button>
+    </div>
+  </nav>
+  <div id="page-content"></div>
+</div>
+
+<!-- Toast container -->
+<!-- Modal overlay -->
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(10,37,64,.6);z-index:500;align-items:center;justify-content:center;padding:1rem">
+  <div id="modal-box" style="background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.2);width:100%;max-width:560px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid #E2E8F0">
+      <h3 id="modal-title" style="font-family:serif;font-size:1.15rem;color:#0A2540"></h3>
+      <button onclick="closeModal()" style="background:none;border:none;font-size:1.5rem;color:#94A3B8;cursor:pointer;line-height:1">×</button>
+    </div>
+    <div id="modal-body" style="padding:1.5rem"></div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;padding:1rem 1.5rem;border-top:1px solid #E2E8F0">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modal-save-btn" onclick="modalSave()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" style="position:fixed;bottom:2rem;right:2rem;z-index:9999;display:flex;flex-direction:column;gap:8px"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────
+var SUPABASE_URL      = 'https://ymgzjrvoffppllxnditj.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltZ3pqcnZvZmZwcGxseG5kaXRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTYxNTAsImV4cCI6MjA5NDE3MjE1MH0.eMYDBaZm4GyMO3tAyJV8FGPzMQ7yCqDwGfgwTXab8A0';
+var ADMIN_EMAIL       = 'medshadoww@gmail.com';
+
+// ─────────────────────────────────────────────
+// ADMIN NOTIFICATION via Web3Forms
+// Free, no account needed — just get your key at:
+// web3forms.com → enter medshadoww@gmail.com → copy key from email
+// ─────────────────────────────────────────────
+var WEB3FORMS_KEY = 'YOUR_WEB3FORMS_ACCESS_KEY'; // paste key here
+
+async function notifyAdmin(userType, name, email, institution) {
+  try {
+    // If key not set yet, skip silently (registration still works)
+    if (!WEB3FORMS_KEY || WEB3FORMS_KEY.includes('YOUR_')) {
+      console.log('Web3Forms key not set — skipping admin email');
+      return;
+    }
+
+    var date = new Date().toLocaleString('en-US', {
+      weekday:'long', year:'numeric', month:'long',
+      day:'numeric', hour:'2-digit', minute:'2-digit'
+    });
+
+    var nl = '\n';
+    var message = 'A new ' + userType + ' has registered on MedShadow and needs your verification.' + nl + nl +
+      'Name:        ' + name + nl +
+      'Email:       ' + email + nl +
+      'Institution: ' + (institution || '-') + nl +
+      'Date:        ' + date + nl + nl +
+      'Log in to verify:' + nl + 'https://medshadow.netlify.app' + nl + nl +
+      '- MedShadow Platform';
+
+    var res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        access_key: WEB3FORMS_KEY,
+        subject:    'MedShadow — New ' + userType + ' Registration: ' + name,
+        from_name:  'MedShadow Platform',
+        email:      ADMIN_EMAIL,
+        message:    message,
+        // Extra fields shown in the email
+        'User Type':    userType,
+        'Name':         name,
+        'User Email':   email,
+        'Institution':  institution || '—',
+        'Registered':   date,
+        'Action Required': 'Log in and verify at https://medshadow.netlify.app'
+      })
+    });
+
+    var data = await res.json();
+    if (data.success) {
+      console.log('Admin notified at ' + ADMIN_EMAIL);
+    } else {
+      console.warn('Web3Forms error:', data.message);
+    }
+  } catch(e) {
+    // Never block registration if email fails
+    console.warn('Admin notification failed (non-critical):', e.message || e);
+  }
+}
+
+// ─────────────────────────────────────────────
+// PARTNER PHYSICIANS — manual list (curated by admin)
+// Add a doctor here once they agree to be listed publicly.
+// This is separate from the Supabase `doctors` table used for
+// actual shadowing scheduling — this list is purely for marketing
+// / visibility on the public Partner Physicians page.
+// ─────────────────────────────────────────────
+var PARTNER_PHYSICIANS = [
+  {
+    name: 'Dr. Jane Smith',
+    practice: 'Example Direct Primary Care',
+    specialty: 'Family Medicine',
+    city: 'Raleigh, NC',
+    emoji: '🩺',
+    quote: 'Mentoring pre-med students is one of the best parts of running an independent practice.',
+    url: '#'
+  },
+  {
+    name: 'Dr. John Doe',
+    practice: 'Example Health DPC',
+    specialty: 'Internal Medicine',
+    city: 'Durham, NC',
+    emoji: '🩺',
+    quote: '',
+    url: '#'
+  }
+  // Add more partner physicians here as they join.
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+var S = {
+  db: null,
+  page: 'landing', tab: '',
+  user: null, profile: null, role: null,
+  regStep: 1, regRole: 'student', regData: {},
+  doctors: [], courses: [], documents: [],
+  enrollments: [], compliance: [],
+  adminStudents: [], adminDoctors: [], verifyQueue: [], allDocs: [], adminAvail: [], adminEnrollments: [],
+  doctorData: null, doctorAvail: [],
+};
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+function $(id){ return document.getElementById(id); }
+function html(id, h){ var el=$(id); if(el) el.innerHTML = h; }
+
+function toast(msg, type) {
+  type = type || 'success';
+  var colors = { success:'#059669', error:'#DC2626', info:'#0098B4', warning:'#D97706' };
+  var bg = colors[type] || '#0A2540';
+  var t = document.createElement('div');
+  t.style.cssText = 'padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.2);max-width:340px;line-height:1.5;background:'+bg+';transition:opacity .3s';
+  t.textContent = msg;
+  var tc = $('toast-container');
+  if (tc) tc.appendChild(t);
+  var dur = type === 'info' ? 2500 : 4500;
+  setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){t.remove();},300); }, dur);
+}
+
+function showPage(page, tab) {
+  S.page = page;
+  if (tab) S.tab = tab;
+  render();
+}
+function setTab(tab) { S.tab = tab; render(); }
+
+function initials(name) {
+  if (!name) return '?';
+  return name.trim().split(' ').map(function(w){ return w[0]; }).join('').slice(0,2).toUpperCase();
+}
+
+// ─────────────────────────────────────────────
+// RENDER ROUTER
+// ─────────────────────────────────────────────
+function render() {
+  var pc = $('page-content');
+  if (!pc) return;
+  pc.className = 'fade-in';
+  void pc.offsetWidth;
+  switch(S.page) {
+    case 'landing':  pc.innerHTML = pageLanding(); break;
+    case 'partners': pc.innerHTML = pagePartners(); break;
+    case 'login':    pc.innerHTML = pageLogin(); break;
+    case 'register': pc.innerHTML = pageRegister(); break;
+    case 'student':  pc.innerHTML = pageDash('student'); break;
+    case 'doctor':   pc.innerHTML = pageDash('doctor'); break;
+    case 'admin':    pc.innerHTML = pageDash('admin'); break;
+    default:         pc.innerHTML = pageLanding();
+  }
+  updateNav();
+}
+
+function updateNav() {
+  var nav = document.querySelector('.nav .nav-actions');
+  if (!nav) return;
+  if (S.user && S.profile) {
+    nav.innerHTML = '<div class="nav-user"><span style="color:rgba(255,255,255,.6);font-size:13px">'+S.profile.full_name.split(' ')[0]+'</span><div class="avatar" onclick="doSignOut()" title="Sign out">'+initials(S.profile.full_name)+'</div></div>';
+  } else {
+    nav.innerHTML = '<button class="btn btn-ghost btn-sm" style="color:#fff;border-color:rgba(255,255,255,.4)" onclick="showPage(\'login\')">Sign In</button><button class="btn btn-primary btn-sm" onclick="showPage(\'register\')">Get Started</button>';
+  }
+}
+
+// ─────────────────────────────────────────────
+// LANDING
+// ─────────────────────────────────────────────
+function pageLanding() {
+  return '<div id="conn-status" style="background:#0A2540;color:rgba(255,255,255,.7);text-align:center;padding:8px;font-size:13px">⏳ Connecting to server...</div>' +
+  '<section style="background:linear-gradient(135deg,#071A2E 0%,#0D3259 60%,#0F4C75 100%);min-height:88vh;display:flex;align-items:center">\
+  <div style="max-width:1100px;margin:0 auto;padding:4rem 2rem;display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center">\
+    <div>\
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(0,152,180,.2);border:1px solid rgba(0,152,180,.4);padding:6px 14px;border-radius:20px;color:#0098B4;font-size:13px;font-weight:600;margin-bottom:1.5rem">🩺 Pre-Med Shadowing Platform</div>\
+      <h1 style="font-size:3rem;color:#fff;line-height:1.15;margin-bottom:1rem">Find Your<br><em style="color:#0098B4">Clinical Shadow</em><br>Opportunity</h1>\
+      <p style="color:rgba(255,255,255,.7);font-size:1.05rem;line-height:1.7;margin-bottom:2rem">Connect with verified physicians, complete HIPAA training, upload credentials, and track every shadowing hour — all in one secure platform.</p>\
+      <div style="display:flex;gap:12px;flex-wrap:wrap">\
+        <button class="btn btn-primary btn-lg" onclick="S.regRole=\'student\';S.regStep=1;showPage(\'register\')">Register as Student</button>\
+        <button class="btn btn-lg" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="S.regRole=\'doctor\';S.regStep=1;showPage(\'register\')">Join as Physician</button>\
+      </div>\
+      <p style="color:rgba(255,255,255,.35);font-size:13px;margin-top:1rem">Free registration for a limited time · Admin-verified credentials</p>\
+    </div>\
+    <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:1.5rem">\
+      '+['🫀|Dr. Sarah Mitchell|Cardiology|2.3 mi|3','👶|Dr. Lisa Chen|Pediatrics|7.8 mi|5','🧠|Dr. Anna Petrov|Neurology|9.2 mi|2'].map(function(d){ var p=d.split('|'); return '<div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:8px"><div style="font-size:1.6rem">'+p[0]+'</div><div style="flex:1"><div style="color:#fff;font-weight:600;font-size:14px">'+p[1]+'</div><div style="color:rgba(255,255,255,.5);font-size:12px">'+p[2]+' · '+p[3]+'</div></div><div style="background:rgba(0,152,180,.3);color:#7DD3FC;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600">'+p[4]+' spots</div></div>'; }).join('')+'\
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.25rem;text-align:center">\
+        <div><div style="font-family:serif;font-size:1.6rem;color:#fff;font-weight:700">240+</div><div style="font-size:12px;color:rgba(255,255,255,.5)">Physicians</div></div>\
+        <div><div style="font-family:serif;font-size:1.6rem;color:#fff;font-weight:700">1,800+</div><div style="font-size:12px;color:rgba(255,255,255,.5)">Students</div></div>\
+        <div><div style="font-family:serif;font-size:1.6rem;color:#fff;font-weight:700">98%</div><div style="font-size:12px;color:rgba(255,255,255,.5)">Satisfaction</div></div>\
+      </div>\
+    </div>\
+  </div></section>\
+  <section style="background:#fff;padding:5rem 2rem">\
+    <div style="max-width:1100px;margin:0 auto">\
+      <div style="text-align:center;margin-bottom:3rem"><h2 style="color:#0A2540;margin-bottom:.75rem">Everything You Need, One Platform</h2><p style="color:#475569;max-width:540px;margin:0 auto">A complete ecosystem connecting pre-med students with real clinical experiences through verified physicians.</p></div>\
+      <div class="grid3">'+[['🔍','#E0F5FA','Find Opportunities','Filter by specialty, location, and availability to find your perfect shadowing match.'],['🔒','#EDE9FE','HIPAA & Compliance','Complete required training and earn certificates before stepping into a clinical setting.'],['📋','#D1FAE5','Document Management','Upload vaccination records and compliance docs securely. Admins verify everything.'],['📅','#FEF3C7','Track Your Hours','Book sessions, view your schedule, and log completed clinical hours automatically.'],['👨‍⚕️','#FCE7F3','Verified Physicians','All physicians are credentialed and reviewed by fellow students before you enroll.'],['🏆','#FEE2E2','Certificates & Records','Download completion certificates and shadowing logs for med school applications.']].map(function(f){ return '<div style="padding:1.75rem;border-radius:16px;border:1px solid #E2E8F0;text-align:center"><div style="width:56px;height:56px;border-radius:14px;background:'+f[1]+';display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 1rem">'+f[0]+'</div><h3 style="font-size:1rem;margin-bottom:.5rem;color:#0A2540">'+f[2]+'</h3><p style="color:#475569;font-size:13px;line-height:1.6">'+f[3]+'</p></div>'; }).join('')+'</div>\
+    </div>\
+  </section>\
+  <section style="background:#0A2540;padding:4rem 2rem;text-align:center">\
+    <h2 style="color:#fff;font-family:serif;margin-bottom:.75rem">Start Your Clinical Journey Today</h2>\
+    <p style="color:rgba(255,255,255,.65);margin-bottom:2rem">Join thousands of pre-med students gaining hands-on experience with verified physicians.</p>\
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">\
+      <button class="btn btn-primary btn-lg" onclick="S.regRole=\'student\';S.regStep=1;showPage(\'register\')">Create Student Account</button>\
+      <button class="btn btn-lg" style="background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.4)" onclick="showPage(\'login\')">Sign In</button>\
+    </div>\
+  </section>\
+  <footer style="background:#071A2E;padding:1.5rem 2rem;text-align:center;color:rgba(255,255,255,.4);font-size:13px">© 2026 MedShadow · '+ADMIN_EMAIL+' · <span style="color:#0098B4;cursor:pointer" onclick="showPage(\'partners\')">Partner Physicians</span></footer>';
+}
+
+// ─────────────────────────────────────────────
+// PARTNER PHYSICIANS PAGE
+// ─────────────────────────────────────────────
+function pagePartners() {
+  var list = PARTNER_PHYSICIANS || [];
+  return '<section style="background:linear-gradient(135deg,#071A2E 0%,#0D3259 60%,#0F4C75 100%);padding:4rem 2rem 3.5rem;text-align:center">\
+    <div style="max-width:700px;margin:0 auto">\
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(0,152,180,.2);border:1px solid rgba(0,152,180,.4);padding:6px 14px;border-radius:20px;color:#0098B4;font-size:13px;font-weight:600;margin-bottom:1.25rem">🤝 Partner Physicians</div>\
+      <h1 style="font-size:2.4rem;color:#fff;line-height:1.2;margin-bottom:1rem">The Practices Opening Their Doors to the Next Generation</h1>\
+      <p style="color:rgba(255,255,255,.7);font-size:1.05rem;line-height:1.7">MedShadow partners with independent and Direct Primary Care physicians who believe in mentorship — giving students real, unhurried access to clinical medicine.</p>\
+    </div>\
+  </section>\
+  <section style="background:#fff;padding:4rem 2rem;min-height:40vh">\
+    <div style="max-width:1000px;margin:0 auto">\
+      '+(list.length===0 ?
+        '<div style="text-align:center;padding:3rem;color:#475569"><div style="font-size:2.5rem;margin-bottom:1rem">🩺</div><h3 style="font-family:serif;margin-bottom:.5rem;color:#0A2540">Our partner network is growing</h3><p>Check back soon to see the physicians mentoring MedShadow students.</p></div>'
+        :
+        '<div class="grid2">'+list.map(partnerCard).join('')+'</div>'
+      )+'\
+      <div style="text-align:center;margin-top:3rem;padding-top:2.5rem;border-top:1px solid #E2E8F0">\
+        <h3 style="color:#0A2540;margin-bottom:.5rem">Is your practice interested in mentoring?</h3>\
+        <p style="color:#475569;margin-bottom:1.5rem">Join our network of partner physicians and help shape the next generation of doctors.</p>\
+        <button class="btn btn-primary btn-lg" onclick="S.regRole=\'doctor\';S.regStep=1;showPage(\'register\')">Join as Physician</button>\
+      </div>\
+    </div>\
+  </section>\
+  <footer style="background:#071A2E;padding:1.5rem 2rem;text-align:center;color:rgba(255,255,255,.4);font-size:13px">© 2026 MedShadow · '+ADMIN_EMAIL+'</footer>';
+}
+
+function partnerCard(p) {
+  return '<div class="card" style="display:flex;gap:14px;align-items:flex-start">\
+    <div style="width:54px;height:54px;border-radius:12px;background:#E0F5FA;display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0">'+(p.emoji||'🩺')+'</div>\
+    <div style="flex:1;min-width:0">\
+      <h3 style="font-size:15px;font-weight:700;color:#0A2540">'+p.name+'</h3>\
+      <p style="font-size:13px;color:#475569;margin-top:2px">'+(p.practice||'')+'</p>\
+      <p style="font-size:12px;color:#94A3B8;margin-top:2px">'+(p.specialty||'')+(p.city?' · '+p.city:'')+'</p>\
+      '+(p.quote?'<p style="font-size:13px;color:#475569;line-height:1.5;margin-top:10px;font-style:italic">"'+p.quote+'"</p>':'')+'\
+      '+(p.url&&p.url!=='#'?'<a href="'+p.url+'" target="_blank" rel="noopener noreferrer" style="font-size:13px;color:#0098B4;font-weight:600;display:inline-block;margin-top:10px">Visit practice →</a>':'')+'\
+    </div>\
+  </div>';
+}
+
+// ─────────────────────────────────────────────
+// LOGIN
+// ─────────────────────────────────────────────
+function pageLogin() {
+  return '<div style="min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;padding:2rem">\
+  <div style="width:100%;max-width:420px">\
+    <div style="text-align:center;margin-bottom:2rem"><h2 style="color:#0A2540;margin-bottom:.5rem">Welcome Back</h2><p style="color:#475569">Sign in to your MedShadow account</p></div>\
+    <div class="card">\
+      <div style="display:flex;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:20px;padding:3px;gap:2px;margin-bottom:1.5rem">\
+        <div id="pt-student" style="flex:1;text-align:center;padding:7px;border-radius:16px;font-size:13px;font-weight:600;cursor:pointer;background:#0A2540;color:#fff" onclick="setLoginRole(\'student\')">Student</div>\
+        <div id="pt-doctor" style="flex:1;text-align:center;padding:7px;border-radius:16px;font-size:13px;font-weight:600;cursor:pointer;color:#475569" onclick="setLoginRole(\'doctor\')">Physician</div>\
+        <div id="pt-admin" style="flex:1;text-align:center;padding:7px;border-radius:16px;font-size:13px;font-weight:600;cursor:pointer;color:#475569" onclick="setLoginRole(\'admin\')">Admin</div>\
+      </div>\
+      <div class="form-group"><label>Email Address</label><input type="email" id="li-email" placeholder="you@email.com"/></div>\
+      <div class="form-group"><label>Password</label><input type="password" id="li-pass" placeholder="••••••••"/></div>\
+      <div id="li-err" style="color:#DC2626;font-size:13px;margin-bottom:10px;display:none"></div>\
+      <button class="btn btn-primary btn-full btn-lg" id="li-btn" onclick="doLogin()">Sign In</button>\
+      <div class="or-div">or</div>\
+      <p style="text-align:center;font-size:14px;color:#475569">No account? <a style="color:#0098B4;font-weight:600;cursor:pointer" onclick="showPage(\'register\')">Register</a></p>\
+    </div>\
+  </div></div>';
+}
+
+var loginRole = 'student';
+function setLoginRole(r) {
+  loginRole = r;
+  ['student','doctor','admin'].forEach(function(rr) {
+    var el = $('pt-'+rr);
+    if (el) { el.style.background = rr===r?'#0A2540':''; el.style.color = rr===r?'#fff':'#475569'; }
+  });
+}
+
+async function doLogin() {
+  var email = $('li-email') && $('li-email').value.trim();
+  var pass  = $('li-pass')  && $('li-pass').value;
+  var err   = $('li-err');
+  var btn   = $('li-btn');
+  if (!email || !pass) { if(err){err.style.display='block';err.textContent='Please enter email and password.';} return; }
+  if (!S.db) { toast('Connecting to server... please try again in a moment.','error'); return; }
+  if (btn) { btn.disabled=true; btn.textContent='Signing in...'; }
+  try {
+    // Step 1: Authenticate
+    var res = await S.db.auth.signInWithPassword({ email: email, password: pass });
+
+    if (res.error) {
+      var msg = res.error.message || '';
+      if (msg.includes('Email not confirmed')) {
+        throw new Error('Email not confirmed. Go to Supabase → Authentication → Users → click your email → Confirm email. Or disable email confirmation in Auth settings.');
+      } else if (msg.includes('Invalid login') || msg.includes('invalid_credentials')) {
+        throw new Error('Wrong email or password. If you have not registered yet, click Register below.');
+      } else {
+        throw new Error(msg || 'Sign in failed.');
+      }
+    }
+
+    // Step 2: Load profile
+    var pRes = await S.db.from('profiles').select('*').eq('id', res.data.user.id).single();
+
+    if (pRes.error) {
+      throw new Error('Profile error: ' + pRes.error.message + ' (code: ' + pRes.error.code + '). Try running: ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY; in Supabase SQL Editor.');
+    }
+    if (!pRes.data) {
+      // Profile missing — create it on the fly
+      var newProfile = { id: res.data.user.id, email: email, full_name: email.split('@')[0], role: 'student' };
+      await S.db.from('profiles').insert(newProfile);
+      pRes = await S.db.from('profiles').select('*').eq('id', res.data.user.id).single();
+      if (!pRes.data) throw new Error('Could not create profile. Please run: ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY; in Supabase SQL Editor.');
+    }
+
+    var role = pRes.data.role;
+
+    // Step 3: Check role matches selected tab (warn if mismatch)
+    if (loginRole === 'admin' && role !== 'admin') {
+      throw new Error("Account [" + email + "] does not have admin role. Fix in Supabase SQL Editor: UPDATE public.profiles SET role = 'admin' WHERE email = '" + email + "';");
+    }
+
+    S.user    = res.data.user;
+    S.profile = pRes.data;
+    S.role    = role;
+
+    var pages = { student:'student', doctor:'doctor', admin:'admin' };
+    var tabs  = { student:'opportunities', doctor:'dr-overview', admin:'admin-overview' };
+    S.tab = tabs[role] || 'opportunities';
+
+    await loadDashData();
+    showPage(pages[role] || 'student');
+    toast('Welcome back, ' + pRes.data.full_name.split(' ')[0] + '! 👋');
+
+  } catch(e) {
+    if(err){ err.style.display='block'; err.textContent = e.message || 'Sign in failed.'; }
+    if(btn){ btn.disabled=false; btn.textContent='Sign In'; }
+  }
+}
+
+// ─────────────────────────────────────────────
+// REGISTER
+// ─────────────────────────────────────────────
+function pageRegister() {
+  var isDoc = S.regRole==='doctor';
+  var steps = isDoc ? ['Account Info','Practice Details','Review & Submit'] : ['Account Info','Credentials','Documents','Review & Complete'];
+  var step = S.regStep || 1;
+  var maxStep = steps.length;
+
+  var stepsHtml = '<div class="steps">';
+  for (var i=0; i<steps.length; i++) {
+    if (i>0) stepsHtml += '<div class="step-line"></div>';
+    stepsHtml += '<div class="step '+(step>i+1?'done':step===i+1?'active':'')+'">\
+      <div class="step-num">'+(step>i+1?'✓':i+1)+'</div>\
+      <div class="step-lbl">'+steps[i]+'</div></div>';
+  }
+  stepsHtml += '</div>';
+
+  var body = '';
+  if (!isDoc) {
+    if (step===1) body = '<h3 style="margin-bottom:1.25rem">Create Your Account</h3>\
+      <div class="form-row"><div class="form-group"><label>First Name</label><input id="r-fn" placeholder="Emma"/></div><div class="form-group"><label>Last Name</label><input id="r-ln" placeholder="Johnson"/></div></div>\
+      <div class="form-group"><label>Email</label><input type="email" id="r-em" placeholder="emma@email.com"/></div>\
+      <div class="form-group"><label>Phone</label><input id="r-ph" placeholder="(704) 555-0100"/></div>\
+      <div class="form-row"><div class="form-group"><label>Password</label><input type="password" id="r-pw" placeholder="Min 8 characters"/></div><div class="form-group"><label>Confirm Password</label><input type="password" id="r-pw2" placeholder="Repeat password"/></div></div>';
+    else if (step===2) body = '<h3 style="margin-bottom:1.25rem">Academic Credentials</h3>\
+      <div class="form-group"><label>University / College</label><input id="r-school" placeholder="UNC Charlotte"/></div>\
+      <div class="form-row"><div class="form-group"><label>Expected Graduation</label><select id="r-grad"><option>May 2026</option><option>May 2027</option><option>May 2028</option></select></div><div class="form-group"><label>GPA (Optional)</label><input id="r-gpa" placeholder="3.85"/></div></div>\
+      <div class="form-group"><label>Major</label><input id="r-maj" placeholder="Biology, Pre-Medicine"/></div>\
+      <div class="form-group"><label>Personal Statement (Optional)</label><textarea id="r-stmt" placeholder="Tell us about your interest in medicine..."></textarea></div>';
+    else if (step===3) body = '<h3 style="margin-bottom:.5rem">Upload Required Documents</h3>\
+      <p style="color:#475569;font-size:13px;margin-bottom:1rem">All files are encrypted and verified by our admin team.</p>\
+      <div class="alert alert-warn">⚠ Some shadowing sites require specific vaccines. Upload all available records.</div>\
+      '+['COVID-19 Vaccination Card*','MMR Vaccination Record*','Influenza Vaccination*','Student ID / Transcript*','Background Check Consent*','Varicella Record (optional)','Tdap Record (optional)'].map(function(d,i){ var id='rdoc'+i; return '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;margin-bottom:8px"><div style="flex:1;font-size:13px;font-weight:600">'+d+'</div><input type="file" id="'+id+'" style="display:none" accept=".pdf,.jpg,.png" onchange="markUploaded(\''+id+'stat\')"/><span id="'+id+'stat" class="badge badge-gray">Not uploaded</span><button class="btn btn-sm btn-outline" onclick="$(\''+id+'\').click()">↑ Upload</button></div>'; }).join('');
+    else if (step===4) body = '<h3 style="margin-bottom:1.25rem">Review & Complete Registration</h3>\
+      <div style="background:linear-gradient(135deg,#059669,#047857);border-radius:16px;padding:2rem;color:#fff;margin-bottom:1.5rem;text-align:center">\
+        <div style="font-size:3rem;margin-bottom:.5rem">🎉</div>\
+        <div style="font-size:1.9rem;font-weight:700;font-family:serif;margin-bottom:.5rem">Free Registration!</div>\
+        <div style="font-size:14px;color:rgba(255,255,255,.85);line-height:1.6">Registration is complimentary for the first month.<br/>No credit card required.</div>\
+      </div>\
+      <div class="alert alert-success">✓ Your account will be activated immediately after clicking Complete Registration.</div>\
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:1.25rem;font-size:14px;margin-bottom:1rem">\
+        <div style="font-weight:600;color:#0A2540;margin-bottom:10px">Account Summary</div>\
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #E2E8F0"><span style="color:#475569">Name</span><span style="font-weight:600">'+S.regData.fn+' '+S.regData.ln+'</span></div>\
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #E2E8F0"><span style="color:#475569">Email</span><span style="font-weight:600">'+S.regData.em+'</span></div>\
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #E2E8F0"><span style="color:#475569">University</span><span style="font-weight:600">'+(S.regData.school||'—')+'</span></div>\
+        <div style="display:flex;justify-content:space-between;padding:8px 0"><span style="color:#475569">Registration Fee</span><span style="font-weight:700;color:#059669">FREE — Limited Time Offer</span></div>\
+      </div>\
+      <div class="alert alert-info">💡 A $10 registration fee will apply after the promotional period. Members registered now are locked in free.</div>';
+  } else {
+    if (step===1) body = '<h3 style="margin-bottom:1.25rem">Create Physician Account</h3>\
+      <div class="form-row"><div class="form-group"><label>First Name</label><input id="dr-fn" placeholder="Sarah"/></div><div class="form-group"><label>Last Name</label><input id="dr-ln" placeholder="Mitchell"/></div></div>\
+      <div class="form-group"><label>Email</label><input type="email" id="dr-em" placeholder="dr@practice.com"/></div>\
+      <div class="form-group"><label>NPI Number</label><input id="dr-npi" placeholder="10-digit NPI"/></div>\
+      <div class="form-row"><div class="form-group"><label>Medical License #</label><input id="dr-lic" placeholder="NC-12345"/></div><div class="form-group"><label>License State</label><select id="dr-st"><option>North Carolina</option><option>South Carolina</option><option>Virginia</option><option>Georgia</option></select></div></div>\
+      <div class="form-row"><div class="form-group"><label>Password</label><input type="password" id="dr-pw" placeholder="Min 8 characters"/></div><div class="form-group"><label>Phone</label><input id="dr-ph" placeholder="(704) 555-0100"/></div></div>';
+    else if (step===2) body = '<h3 style="margin-bottom:1.25rem">Practice Information</h3>\
+      <div class="form-group"><label>Practice / Hospital Name</label><input id="dr-pr" placeholder="Charlotte Heart Institute"/></div>\
+      <div class="form-group"><label>Primary Specialty</label><select id="dr-sp"><option>Cardiology</option><option>Orthopedics</option><option>Pediatrics</option><option>Emergency Medicine</option><option>Neurology</option><option>Surgery</option><option>Internal Medicine</option><option>Family Medicine</option></select></div>\
+      <div class="form-group"><label>Practice Address</label><input id="dr-addr" placeholder="123 Medical Dr, Charlotte, NC 28203"/></div>\
+      <div class="form-row"><div class="form-group"><label>Max Students / Session</label><select id="dr-mx"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div><div class="form-group"><label>Sub-Specialty (Optional)</label><input id="dr-sub" placeholder="Interventional Cardiology"/></div></div>\
+      <div class="form-group"><label>Bio / Message to Students</label><textarea id="dr-bio" placeholder="Tell students about your practice and what they will experience..."></textarea></div>';
+    else if (step===3) body = '<h3 style="margin-bottom:1.25rem">Review & Submit</h3>\
+      <div class="alert alert-info">🔒 Your credentials will be verified by our admin team within 1–3 business days. You\'ll be notified once approved.</div>\
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:1rem">\
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #E2E8F0;font-size:14px"><span style="color:#475569">Name</span><span style="font-weight:600">Dr. '+((S.regData&&S.regData.drfn)||'')+'</span></div>\
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #E2E8F0;font-size:14px"><span style="color:#475569">Email</span><span style="font-weight:600">'+((S.regData&&S.regData.drem)||'')+'</span></div>\
+        <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px"><span style="color:#475569">Specialty</span><span style="font-weight:600">'+((S.regData&&S.regData.drsp)||'—')+'</span></div>\
+      </div>';
+  }
+
+  var btnLabel = (isDoc && step===maxStep) ? 'Submit for Verification →' : (!isDoc && step===maxStep) ? 'Complete Registration →' : 'Continue →';
+
+  return '<div style="min-height:calc(100vh - 64px);background:#F0F4F8;display:flex;align-items:flex-start;justify-content:center;padding:3rem 1rem">\
+  <div style="width:100%;max-width:580px">\
+    <div style="display:flex;justify-content:center;gap:8px;margin-bottom:1.5rem">\
+      <button class="btn btn-sm '+((!isDoc)?'btn-primary':'btn-ghost')+'" onclick="S.regRole=\'student\';S.regStep=1;showPage(\'register\')">Student</button>\
+      <button class="btn btn-sm '+((isDoc)?'btn-primary':'btn-ghost')+'" onclick="S.regRole=\'doctor\';S.regStep=1;showPage(\'register\')">Physician</button>\
+    </div>\
+    <div class="card">\
+      '+stepsHtml+'\
+      <div id="reg-err" style="color:#DC2626;font-size:13px;margin-bottom:10px;display:none"></div>\
+      '+body+'\
+      <div class="divider"></div>\
+      <div style="display:flex;justify-content:space-between;align-items:center">\
+        '+(step>1?'<button class="btn btn-ghost" onclick="S.regStep='+(step-1)+';showPage(\'register\')">← Back</button>':'<div></div>')+'\
+        <button class="btn btn-primary" id="reg-btn" onclick="handleReg('+step+','+maxStep+','+isDoc+')">'+btnLabel+'</button>\
+      </div>\
+    </div>\
+    <p style="text-align:center;font-size:13px;color:#94A3B8;margin-top:1rem">Already registered? <a style="color:#0098B4;cursor:pointer" onclick="showPage(\'login\')">Sign in</a></p>\
+  </div></div>';
+}
+
+function markUploaded(id) { var el=$(id); if(el){el.className='badge badge-green';el.textContent='✓ Ready';} }
+
+async function handleReg(step, max, isDoc) {
+  var err = $('reg-err');
+  var btn = $('reg-btn');
+  if (err) err.style.display='none';
+
+  // Collect data
+  if (!isDoc && step===1) {
+    var fn=$('r-fn')&&$('r-fn').value.trim(), ln=$('r-ln')&&$('r-ln').value.trim();
+    var em=$('r-em')&&$('r-em').value.trim(), pw=$('r-pw')&&$('r-pw').value, pw2=$('r-pw2')&&$('r-pw2').value;
+    if (!fn||!ln||!em||!pw) { if(err){err.style.display='block';err.textContent='Please fill all required fields.';} return; }
+    if (pw!==pw2) { if(err){err.style.display='block';err.textContent='Passwords do not match.';} return; }
+    if (pw.length<8) { if(err){err.style.display='block';err.textContent='Password must be at least 8 characters.';} return; }
+    S.regData = { fn:fn, ln:ln, em:em, pw:pw, ph:$('r-ph')&&$('r-ph').value };
+  }
+  if (!isDoc && step===2) {
+    S.regData.school = $('r-school')&&$('r-school').value;
+    S.regData.gpa    = $('r-gpa')&&$('r-gpa').value;
+    S.regData.major  = $('r-maj')&&$('r-maj').value;
+    S.regData.stmt   = $('r-stmt')&&$('r-stmt').value;
+  }
+  if (isDoc && step===1) {
+    S.regData.drfn=$('dr-fn')&&$('dr-fn').value.trim();
+    S.regData.drln=$('dr-ln')&&$('dr-ln').value.trim();
+    S.regData.drem=$('dr-em')&&$('dr-em').value.trim();
+    S.regData.drpw=$('dr-pw')&&$('dr-pw').value;
+    S.regData.drnpi=$('dr-npi')&&$('dr-npi').value;
+    S.regData.drlic=$('dr-lic')&&$('dr-lic').value;
+    S.regData.drst=$('dr-st')&&$('dr-st').value;
+    S.regData.drph=$('dr-ph')&&$('dr-ph').value;
+    if (!S.regData.drfn||!S.regData.drln||!S.regData.drem||!S.regData.drpw) { if(err){err.style.display='block';err.textContent='Please fill all required fields.';} return; }
+  }
+  if (isDoc && step===2) {
+    S.regData.drpr=$('dr-pr')&&$('dr-pr').value;
+    S.regData.drsp=$('dr-sp')&&$('dr-sp').value;
+    S.regData.draddr=$('dr-addr')&&$('dr-addr').value;
+    S.regData.drmx=parseInt($('dr-mx')&&$('dr-mx').value)||2;
+    S.regData.drsub=$('dr-sub')&&$('dr-sub').value;
+    S.regData.drbio=$('dr-bio')&&$('dr-bio').value;
+  }
+
+  // Final step
+  if (!isDoc && step===max) {
+    if (!S.db) {
+      toast('Not connected yet. Please wait a moment and try again.', 'error'); return;
+    }
+
+    if(btn){btn.disabled=true; btn.textContent='Creating account...';}
+    if(err){err.style.display='none';}
+
+    try {
+      // ── Step 1: Create Supabase account ──
+      toast('Creating your account...', 'info');
+      var sRes = await S.db.auth.signUp({
+        email: S.regData.em,
+        password: S.regData.pw,
+        options: {
+          data: { full_name: S.regData.fn + ' ' + S.regData.ln, role: 'student' },
+          emailRedirectTo: undefined
+        }
+      });
+
+      if (sRes.error) {
+        var errMsg = sRes.error.message || '';
+        if (errMsg.toLowerCase().includes('already registered') || errMsg.toLowerCase().includes('already been registered')) {
+          throw new Error('An account with this email already exists. Please sign in instead.');
+        }
+        if (errMsg.toLowerCase().includes('rate limit')) {
+          throw new Error('Too many signups attempted. Please wait 1 hour and try again, or ask admin to disable email confirmation in Supabase → Authentication → Configuration → Email.');
+        }
+        throw new Error('Account error: ' + errMsg);
+      }
+
+      // ── Step 2: Sign in ──
+      if(btn) btn.textContent = 'Signing in...';
+      var lRes = await S.db.auth.signInWithPassword({
+        email: S.regData.em,
+        password: S.regData.pw
+      });
+      if (lRes.error) throw new Error('Sign-in error: ' + lRes.error.message);
+      var uid = lRes.data.user.id;
+
+      // ── Step 3: Save student record (free — no payment required) ──
+      if(btn) btn.textContent = 'Saving profile...';
+      var insRes = await S.db.from('students').insert({
+        id: uid,
+        university: S.regData.school || '',
+        major: S.regData.major || '',
+        personal_statement: S.regData.stmt || '',
+        gpa: parseFloat(S.regData.gpa) || null,
+        reg_fee_paid: true,
+        reg_fee_paid_at: new Date().toISOString(),
+        stripe_payment_id: 'FREE_PROMO_MONTH1',
+        verification_status: 'pending'
+      });
+      if (insRes.error) throw new Error('Database error: ' + insRes.error.message);
+
+      // ── Done ──
+      S.user = lRes.data.user;
+      var pRes = await S.db.from('profiles').select('*').eq('id',uid).single();
+      S.profile = pRes.data; S.role='student'; S.tab='opportunities';
+
+      // Notify admin of new student registration (non-blocking)
+      notifyAdmin(
+        'Student',
+        S.regData.fn + ' ' + S.regData.ln,
+        S.regData.em,
+        S.regData.school || '—'
+      );
+
+      await loadDashData();
+      showPage('student');
+      toast('Registration complete! Welcome to MedShadow 🎉');
+
+    } catch(e) {
+      if(err){err.style.display='block';err.textContent=e.message||'Payment failed. Please check your card details.';}
+      if(btn){btn.disabled=false;btn.textContent='Complete Registration →';}
+    }
+    return;
+  }
+
+  if (isDoc && step===max) {
+    if (!S.db) { toast('Not connected to server yet.','error'); return; }
+    if(btn){btn.disabled=true;btn.textContent='Submitting...';}
+    try {
+      var sRes = await S.db.auth.signUp({ email:S.regData.drem, password:S.regData.drpw, options:{data:{full_name:'Dr. '+S.regData.drfn+' '+S.regData.drln,role:'doctor'}} });
+      if (sRes.error) throw sRes.error;
+      var lRes = await S.db.auth.signInWithPassword({ email:S.regData.drem, password:S.regData.drpw });
+      if (lRes.error) throw lRes.error;
+      var uid = lRes.data.user.id;
+      await S.db.from('doctors').insert({ id:uid, npi_number:S.regData.drnpi, license_number:S.regData.drlic, license_state:S.regData.drst, specialty:S.regData.drsp, practice_name:S.regData.drpr, practice_address:S.regData.draddr, max_students:S.regData.drmx, bio:S.regData.drbio, sub_specialty:S.regData.drsub, verification_status:'pending', is_verified:false });
+      await S.db.from('profiles').update({phone:S.regData.drph}).eq('id',uid);
+      S.user=lRes.data.user; var pRes=await S.db.from('profiles').select('*').eq('id',uid).single();
+      S.profile=pRes.data; S.role='doctor'; S.tab='dr-overview';
+
+      // Notify admin of new physician registration (non-blocking)
+      notifyAdmin(
+        'Physician',
+        'Dr. ' + S.regData.drfn + ' ' + S.regData.drln,
+        S.regData.drem,
+        S.regData.drpr || '—'
+      );
+
+      showPage('doctor');
+      toast('Application submitted! Admin has been notified and will verify within 1–3 business days.');
+    } catch(e) { if(err){err.style.display='block';err.textContent=e.message||'Registration failed.';} if(btn){btn.disabled=false;btn.textContent='Submit for Verification →';} }
+    return;
+  }
+
+  S.regStep = step+1; showPage('register');
+}
+
+// ─────────────────────────────────────────────
+// DASHBOARDS
+// ─────────────────────────────────────────────
+function pageDash(role) {
+  var sideItems, content;
+  if (role==='student') {
+    sideItems = [{label:'Main',items:[{k:'opportunities',e:'🔍',t:'Find Shadowing'},{k:'schedule',e:'📅',t:'My Schedule'},{k:'documents',e:'📄',t:'Documents'},{k:'courses',e:'📚',t:'Courses & Training'},{k:'compliance',e:'🛡',t:'Compliance'}]},{label:'Account',items:[{k:'profile',e:'👤',t:'My Profile'}]}];
+    if (!S.tab || !['opportunities','schedule','documents','courses','compliance','profile'].includes(S.tab)) S.tab='opportunities';
+    if (S.tab==='opportunities') content = contentOpportunities();
+    else if (S.tab==='schedule') content = contentSchedule();
+    else if (S.tab==='documents') content = contentDocuments();
+    else if (S.tab==='courses') content = contentCourses();
+    else if (S.tab==='compliance') content = contentCompliance();
+    else if (S.tab==='profile') content = contentProfile();
+    else content = contentOpportunities();
+  } else if (role==='doctor') {
+    sideItems = [{label:'Manage',items:[{k:'dr-overview',e:'🏠',t:'Overview'},{k:'dr-profile',e:'👤',t:'My Profile'},{k:'dr-avail',e:'📅',t:'Availability'},{k:'dr-students',e:'👥',t:'Student Requests'}]}];
+    if (!S.tab || !['dr-overview','dr-profile','dr-avail','dr-students'].includes(S.tab)) S.tab='dr-overview';
+    if (S.tab==='dr-overview') content = contentDrOverview();
+    else if (S.tab==='dr-profile') content = contentDrProfile();
+    else if (S.tab==='dr-avail') content = contentDrAvail();
+    else if (S.tab==='dr-students') content = contentDrStudents();
+    else content = contentDrOverview();
+  } else {
+    sideItems = [{label:'Overview',items:[{k:'admin-overview',e:'📊',t:'Dashboard'}]},{label:'Users',items:[{k:'admin-students',e:'👥',t:'Students'},{k:'admin-doctors',e:'👨‍⚕️',t:'Physicians'},{k:'admin-verify',e:'🛡',t:'Verifications'},{k:'admin-adddr',e:'➕',t:'Add Physician'}]},{label:'Shadowing',items:[{k:'admin-opps',e:'🔍',t:'Opportunities'},{k:'admin-schedule',e:'📅',t:'All Schedules'}]},{label:'Programs',items:[{k:'admin-courses',e:'📚',t:'Courses'},{k:'admin-compliance',e:'🔒',t:'Compliance Rules'},{k:'admin-announce',e:'📢',t:'Announcements'},{k:'admin-settings',e:'⚙️',t:'Platform Settings'}]},{label:'Finance',items:[{k:'admin-payments',e:'💰',t:'Payments'}]}];
+    if (!S.tab) S.tab='admin-overview';
+    if (S.tab==='admin-overview') content = contentAdminOverview();
+    else if (S.tab==='admin-students') content = contentAdminStudents();
+    else if (S.tab==='admin-doctors') content = contentAdminDoctors();
+    else if (S.tab==='admin-verify') content = contentAdminVerify();
+    else if (S.tab==='admin-courses') content = contentAdminCourses();
+    else if (S.tab==='admin-compliance') content = contentAdminCompliance();
+    else if (S.tab==='admin-adddr') content = contentAdminAddDr();
+    else if (S.tab==='admin-payments')  content = contentAdminPayments();
+    else if (S.tab==='admin-opps')      content = contentAdminOpps();
+    else if (S.tab==='admin-schedule')  content = contentAdminSchedule();
+    else if (S.tab==='admin-announce') content = contentAdminAnnounce();
+    else if (S.tab==='admin-settings') content = contentAdminSettings();
+    else content = contentAdminOverview();
+  }
+  var sidebar = '<div class="sidebar">'+sideItems.map(function(sec){ return '<div class="sidebar-section"><div class="sidebar-label">'+sec.label+'</div>'+sec.items.map(function(item){ return '<div class="sidebar-item '+(S.tab===item.k?'active':'')+'" onclick="setTab(\''+item.k+'\')">'+item.e+' <span>'+item.t+'</span></div>'; }).join('')+'</div>'; }).join('')+'<div class="sidebar-section"><div class="sidebar-item" style="color:rgba(220,38,38,.7)" onclick="doSignOut()">✕ Sign Out</div></div></div>';
+  return '<div class="layout">'+sidebar+'<div class="main fade-in">'+content+'</div></div>';
+}
+
+// ─────────────────────────────────────────────
+// STUDENT CONTENT
+// ─────────────────────────────────────────────
+function contentOpportunities() {
+  var docs = S.doctors;
+  return '<div class="section-hdr"><div><h2 class="section-title">Shadowing Opportunities</h2><p style="color:#475569;font-size:14px">'+docs.length+' verified physicians near your area</p></div></div>\
+  <div class="alert alert-warn">⚠ Complete HIPAA training and upload vaccination records before enrolling in any session.</div>\
+  <div style="display:flex;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap">\
+    <div style="display:flex;gap:6px;align-items:center;background:#fff;border:1px solid #CBD5E1;border-radius:8px;padding:4px 12px;flex:1;min-width:200px">\
+      🔍 <input style="border:none;box-shadow:none;padding:8px 4px;background:transparent;width:100%" placeholder="Search by name or specialty..." oninput="filterDocs(this.value)"/>\
+    </div>\
+    <select style="width:auto;min-width:160px" onchange="filterSpec(this.value)">\
+      <option value="">All Specialties</option>\
+      <option>Cardiology</option><option>Pediatrics</option><option>Orthopedics</option><option>Emergency Medicine</option><option>Neurology</option><option>Surgery</option><option>Internal Medicine</option><option>Family Medicine</option>\
+    </select>\
+  </div>\
+  <div class="grid2" id="opp-grid">\
+  '+(docs.length===0 ? '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:#475569"><p>'+( S.db ? 'No verified physicians available yet. Check back soon.' : 'Connecting to server...')+'</p></div>' : docs.map(function(d){ return oppCard(d); }).join(''))+'\
+  </div>';
+}
+function oppCard(d) {
+  var name = d.profiles&&d.profiles.full_name ? d.profiles.full_name : 'Physician';
+  var avail = d.doctor_availability ? d.doctor_availability.filter(function(a){return a.is_active;}).slice(0,3).map(function(a){return a.day_of_week.slice(0,3)+' '+a.start_time.slice(0,5);}) : [];
+  return '<div class="opp-card">\
+    <div style="display:flex;gap:12px">\
+      <div style="width:50px;height:50px;border-radius:12px;background:#E0F5FA;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0">🩺</div>\
+      <div style="flex:1;min-width:0">\
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">\
+          <h3 style="font-size:15px;font-weight:700">'+name+' <span style="color:#0098B4;font-size:12px">'+(d.is_verified?'✓':'')+'</span></h3>\
+          <span class="badge badge-'+(d.max_students>3?'green':d.max_students>1?'amber':'red')+'">'+d.max_students+' spots</span>\
+        </div>\
+        <p style="font-size:13px;color:#475569;margin-top:2px">'+(d.specialty||'General')+' · '+(d.practice_name||'')+'</p>\
+        <div style="margin:8px 0;display:flex;flex-wrap:wrap;gap:4px">'+avail.map(function(a){return '<span style="background:#E0F5FA;color:#007A91;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600">'+a+'</span>';}).join('')+'</div>\
+        <p style="font-size:13px;color:#475569;line-height:1.5">'+(d.bio||'').slice(0,100)+(d.bio&&d.bio.length>100?'...':'')+'</p>\
+      </div>\
+    </div>\
+    <div class="opp-footer">\
+      <div style="font-size:12px;color:#94A3B8">Requires: '+(d.requirements&&d.requirements.length?d.requirements.slice(0,2).join(', '):'HIPAA Certificate')+'</div>\
+      <button class="btn btn-primary btn-sm" onclick="enrollDoc(\''+d.id+'\',\''+name+'\')">Enroll Now</button>\
+    </div>\
+  </div>';
+}
+function filterDocs(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('#opp-grid .opp-card').forEach(function(c){ c.style.display=(!q||c.textContent.toLowerCase().includes(q))?'':'none'; });
+}
+function filterSpec(s) {
+  document.querySelectorAll('#opp-grid .opp-card').forEach(function(c){ c.style.display=(!s||c.textContent.includes(s))?'':'none'; });
+}
+
+function contentSchedule() {
+  var enr = S.enrollments;
+  var upcoming=enr.filter(function(e){return e.status==='approved'||e.status==='pending';});
+  var done=enr.filter(function(e){return e.status==='completed';});
+  var hrs = done.reduce(function(s,e){return s+(parseFloat(e.hours_logged)||4);},0);
+  return '<div class="section-hdr"><h2 class="section-title">My Schedule</h2><span class="badge badge-teal">'+hrs+'h logged</span></div>\
+  <div class="grid4" style="margin-bottom:1.5rem">\
+    <div class="stat-card"><div class="stat-val">'+hrs+'h</div><div class="stat-lbl">Hours Logged</div></div>\
+    <div class="stat-card"><div class="stat-val">'+done.length+'</div><div class="stat-lbl">Completed</div></div>\
+    <div class="stat-card"><div class="stat-val">'+upcoming.length+'</div><div class="stat-lbl">Upcoming</div></div>\
+    <div class="stat-card"><div class="stat-val">'+new Set(enr.map(function(e){return e.doctors&&e.doctors.specialty;})).size+'</div><div class="stat-lbl">Specialties</div></div>\
+  </div>\
+  <h3 style="margin-bottom:1rem">Upcoming Sessions</h3>\
+  '+(upcoming.length===0?'<p style="color:#475569;font-style:italic">No upcoming sessions. <a style="color:#0098B4;cursor:pointer" onclick="setTab(\'opportunities\')">Find opportunities →</a></p>':upcoming.map(schedItem).join(''))+'\
+  <h3 style="margin:1.5rem 0 1rem">Completed Sessions</h3>\
+  '+(done.length===0?'<p style="color:#475569;font-style:italic">No completed sessions yet.</p>':done.map(function(e){return schedItem(e,true);}).join(''));
+}
+function schedItem(e,done) {
+  var d=new Date(e.session_date); var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat']; var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return '<div class="sched-item"><div class="sched-date" style="'+(done?'background:#D1FAE5':'')+'"><div style="font-size:11px;font-weight:700;color:'+(done?'#059669':'#007A91')+';text-transform:uppercase">'+days[d.getDay()]+'</div><div style="font-size:1.5rem;font-weight:700;color:#0A2540;line-height:1">'+d.getDate()+'</div><div style="font-size:11px;color:#475569">'+months[d.getMonth()]+'</div></div><div style="flex:1"><h4 style="font-size:15px;font-weight:600">'+(e.doctors&&e.doctors.profiles?e.doctors.profiles.full_name:'Physician')+'</h4><p style="font-size:13px;color:#475569">'+(e.doctors?e.doctors.specialty||'':'')+'</p><p style="font-size:12px;color:#94A3B8;margin-top:2px">⏰ '+e.start_time.slice(0,5)+' – '+e.end_time.slice(0,5)+'</p></div><div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end"><span class="badge badge-'+(done?'green':e.status==='approved'?'teal':'amber')+'">'+(done?'✓ Completed':e.status)+'</span>'+(done?'<button class="btn btn-sm btn-outline" onclick="toast(\'Log downloaded!\')">Download Log</button>':'<button class="btn btn-sm btn-ghost" onclick="cancelEnr(\''+e.id+'\')">Cancel</button>')+'</div></div>';
+}
+
+function contentDocuments() {
+  var docs=S.documents;
+  var v=docs.filter(function(d){return d.status==='verified';}).length;
+  var p=docs.filter(function(d){return d.status==='pending'||d.status==='under_review';}).length;
+  var r=docs.filter(function(d){return d.status==='rejected';}).length;
+  var smap={verified:{cls:'badge-green',lbl:'Verified'},pending:{cls:'badge-amber',lbl:'Pending'},under_review:{cls:'badge-amber',lbl:'Under Review'},rejected:{cls:'badge-red',lbl:'Rejected'}};
+  return '<div class="section-hdr"><h2 class="section-title">My Documents</h2><button class="btn btn-primary btn-sm" onclick="$(\'doc-up-main\').click()">↑ Upload New</button></div>\
+  <input type="file" id="doc-up-main" style="display:none" accept=".pdf,.jpg,.png" onchange="handleDocUp(event)"/>\
+  <div class="grid3" style="margin-bottom:1.5rem">\
+    <div class="stat-card"><div class="stat-val" style="color:#059669">'+v+'</div><div class="stat-lbl">Verified</div></div>\
+    <div class="stat-card"><div class="stat-val" style="color:#D97706">'+p+'</div><div class="stat-lbl">Pending</div></div>\
+    <div class="stat-card"><div class="stat-val" style="color:#DC2626">'+r+'</div><div class="stat-lbl">Action Required</div></div>\
+  </div>\
+  '+(r>0?'<div class="alert alert-danger">⚠ '+r+' document(s) rejected. Please re-upload.</div>':'')+'\
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:1.5rem"><table>\
+    <thead><tr><th>Document</th><th>Type</th><th>Uploaded</th><th>Status</th><th>Notes</th><th>Action</th></tr></thead>\
+    <tbody>'+(docs.length===0?'<tr><td colspan="6" style="text-align:center;padding:2rem;color:#475569">No documents yet. Upload your vaccination records to get started.</td></tr>':docs.map(function(d){var st=smap[d.status]||{cls:'badge-gray',lbl:d.status};return'<tr><td><strong>'+d.document_name+'</strong></td><td><span class="badge badge-gray">'+d.document_type+'</span></td><td style="font-size:13px;color:#475569">'+new Date(d.created_at).toLocaleDateString()+'</td><td><span class="badge '+st.cls+'">'+st.lbl+'</span></td><td style="font-size:12px;color:#475569">'+(d.review_notes||'—')+'</td><td><button class="btn btn-sm btn-ghost" onclick="toast(\'Opening document...\')">View</button></td></tr>';}).join(''))+'</tbody></table></div>\
+  <div class="card"><h3 style="font-family:serif;margin-bottom:1.25rem">Upload Document</h3>\
+    <div class="form-row" style="margin-bottom:1rem"><div class="form-group"><label>Document Name</label><input id="doc-name" placeholder="e.g. COVID-19 Vaccination Card"/></div>\
+    <div class="form-group"><label>Type</label><select id="doc-type"><option value="Vaccination">Vaccination Record</option><option value="Academic">Academic / Transcript</option><option value="Compliance">Compliance Certificate</option><option value="Identity">ID / Student Card</option><option value="Other">Other</option></select></div></div>\
+    <div style="background:#F0F9FF;border:1px solid #0098B4;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:1rem">\
+      <strong style="color:#0098B4">Quick upload — click to pre-fill and select file:</strong>\
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">\
+        <button class="btn btn-sm btn-ghost" onclick="setDocQuick(\'COVID-19 Vaccination\',\'Vaccination\')">💉 COVID-19</button>\
+        <button class="btn btn-sm btn-ghost" onclick="setDocQuick(\'MMR Vaccination\',\'Vaccination\')">💉 MMR</button>\
+        <button class="btn btn-sm btn-ghost" onclick="setDocQuick(\'Influenza Vaccination\',\'Vaccination\')">💉 Flu Shot</button>\
+        <button class="btn btn-sm btn-ghost" onclick="setDocQuick(\'Student ID\',\'Identity\')">🪪 Student ID</button>\
+        <button class="btn btn-sm btn-ghost" onclick="setDocQuick(\'HIPAA Certificate\',\'Compliance\')">🔒 HIPAA Cert</button>\
+        <button class="btn btn-sm btn-ghost" onclick="setDocQuick(\'Background Check\',\'Compliance\')">📋 Background Check</button>\
+      </div>\
+    </div>\
+    <div class="upload-zone" onclick="$(\'doc-up-zone\').click()"><input type="file" id="doc-up-zone" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.heic,.doc,.docx" onchange="handleDocUp(event)"/><div style="font-size:2rem;margin-bottom:.5rem">📎</div><p style="font-weight:600;margin-bottom:.25rem">Click to select file or drag & drop</p><p style="font-size:13px;color:#94A3B8">PDF, JPG, PNG, DOC — max 10MB</p></div>\
+  </div>';
+}
+
+function contentCourses() {
+  var enrolled=new Set(S.courseEnr&&S.courseEnr.map(function(e){return e.course_id;}));
+  return '<div class="section-hdr"><h2 class="section-title">Courses & Training</h2></div>\
+  <div class="alert alert-warn">⚠ Complete all Required courses before your first shadowing session.</div>\
+  <div class="tabs"><div class="tab active" onclick="filterCourseTab(this,\'All\')">All</div><div class="tab" onclick="filterCourseTab(this,\'Required\')">Required</div><div class="tab" onclick="filterCourseTab(this,\'Recommended\')">Recommended</div><div class="tab" onclick="filterCourseTab(this,\'Elective\')">Elective</div></div>\
+  <div class="grid3" id="course-grid">\
+  '+(S.courses.length===0?'<div style="grid-column:1/-1;text-align:center;padding:3rem;color:#475569">Loading courses...</div>':S.courses.map(function(c){var isEnr=enrolled.has(c.id);return'<div class="course-card" data-cat="'+c.category+'"><div style="height:90px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;background:'+(c.color_hex||'#0891B2')+'20">'+( c.emoji||'📚')+'</div><div style="padding:1.25rem"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:6px"><h3 style="font-size:14px;font-weight:700;line-height:1.3">'+c.title+'</h3><span class="badge '+(c.category==='Required'?'badge-red':c.category==='Recommended'?'badge-amber':'badge-gray')+'" style="font-size:11px;flex-shrink:0">'+c.category+'</span></div><p style="font-size:13px;color:#475569;line-height:1.5;margin-bottom:10px">'+(c.description||'').slice(0,90)+'...</p><div style="font-size:12px;color:#94A3B8">⏰ '+c.duration_hrs+'h · 📖 '+c.lesson_count+' lessons'+(c.is_certified?' · 🏆 Certificate':'')+'</div></div><div style="padding:0 1.25rem 1.25rem;display:flex;align-items:center;justify-content:space-between"><span style="font-weight:700;color:'+(c.price_cents===0?'#059669':'#0A2540');'};font-size:15px">'+(c.price_cents===0?'Free':'$'+(c.price_cents/100).toFixed(2))+'</span>'+(c.course_url?'<a href="'+c.course_url+'" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="text-decoration:none">🔗 Join Course</a>':isEnr?'<span class="badge badge-green">✓ Enrolled</span>':'<button class="btn btn-primary btn-sm" onclick="enrCourse(\''+c.id+'\',\''+c.title+'\','+c.price_cents+')">Enroll</button>')+'</div>'+(c.course_url&&!isEnr?'<div style="padding:0 1.25rem .75rem;text-align:right"><button class="btn btn-ghost btn-sm" onclick="enrCourse(\''+c.id+'\',\''+c.title+'\','+c.price_cents+')">+ Track Progress</button></div>':'')+'</div>';}).join(''))+'\
+  </div>';
+}
+function filterCourseTab(el,cat) {
+  el.closest('.tabs').querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  document.querySelectorAll('#course-grid .course-card').forEach(function(c){c.style.display=(cat==='All'||c.dataset.cat===cat)?'':'none';});
+}
+
+function contentCompliance() {
+  var reqs=S.compliance; var docs=S.documents;
+  var verifiedCount=docs.filter(function(d){return d.status==='verified';}).length;
+  var reqCount=reqs.filter(function(r){return r.is_mandatory;}).length;
+  var pct=reqCount>0?Math.min(100,Math.round(verifiedCount/reqCount*100)):0;
+  return '<div class="section-hdr"><h2 class="section-title">Compliance Status</h2></div>\
+  <div class="card" style="margin-bottom:1.5rem"><h3 style="margin-bottom:1rem">Overall Progress</h3><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px;color:#475569">Compliance Completion</span><span style="font-weight:700">'+pct+'%</span></div><div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%"></div></div><p style="font-size:12px;color:#94A3B8;margin-top:6px">'+verifiedCount+' of '+reqCount+' required documents verified</p></div>\
+  '+(reqs.length===0?'<p style="color:#475569">Loading compliance requirements...</p>':reqs.map(function(r){return'<div class="card" style="margin-bottom:10px;padding:1rem"><div style="display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:10px;background:#E0F5FA;display:flex;align-items:center;justify-content:center;flex-shrink:0">🛡</div><div style="flex:1"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px"><strong>'+r.name+'</strong><span class="badge '+(r.is_mandatory?'badge-red':'badge-amber')+'">'+(r.is_mandatory?'Required':'Recommended')+'</span></div><p style="font-size:12px;color:#475569;margin-top:2px">'+(r.description||'')+'</p></div><button class="btn btn-sm btn-outline" onclick="setTab(\'documents\')">Upload Doc</button></div></div>';}).join(''));
+}
+
+function contentProfile() {
+  var p=S.profile||{};
+  return '<div class="section-hdr"><h2 class="section-title">My Profile</h2><button class="btn btn-primary btn-sm" onclick="saveProfile()">✓ Save Changes</button></div>\
+  <div class="grid2"><div class="card"><h3 style="margin-bottom:1.25rem">Personal Information</h3><div style="display:flex;align-items:center;gap:14px;margin-bottom:1.25rem"><div style="width:64px;height:64px;border-radius:50%;background:#0098B4;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:#fff">'+initials(p.full_name)+'</div><div><p style="font-weight:700;font-size:16px">'+p.full_name+'</p><p style="color:#475569;font-size:13px">'+p.email+'</p><span class="badge badge-green">✓ Verified Student</span></div></div>\
+    <div class="form-group"><label>Full Name</label><input id="prof-name" value="'+(p.full_name||'')+'"/></div>\
+    <div class="form-group"><label>Phone</label><input id="prof-phone" value="'+(p.phone||'')+'" placeholder="(704) 555-0100"/></div></div>\
+  <div class="card"><h3 style="margin-bottom:1rem">Account Summary</h3>\
+    <div class="grid2" style="margin-bottom:1rem">\
+      <div class="stat-card"><div class="stat-val">'+S.enrollments.filter(function(e){return e.status==='completed';}).reduce(function(s,e){return s+(parseFloat(e.hours_logged)||4);},0)+'h</div><div class="stat-lbl">Hours</div></div>\
+      <div class="stat-card"><div class="stat-val">'+S.documents.filter(function(d){return d.status==='verified';}).length+'</div><div class="stat-lbl">Verified Docs</div></div>\
+    </div>\
+    '+[['Email',p.email||''],['Role','Pre-Med Student'],['Status','Active']].map(function(r){return'<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #E2E8F0;font-size:13px"><span style="color:#475569">'+r[0]+'</span><span style="font-weight:600">'+r[1]+'</span></div>';}).join('')+'</div></div>';
+}
+
+// ─────────────────────────────────────────────
+// DOCTOR CONTENT
+// ─────────────────────────────────────────────
+function contentDrOverview() {
+  var p=S.profile||{}; var d=S.doctorData||{};
+  return '<div class="section-hdr"><div><h2 class="section-title">Welcome, '+p.full_name+'</h2><p style="color:#475569;font-size:14px">Physician Dashboard</p></div><span class="badge '+(d.is_verified?'badge-green':'badge-amber')+'">'+(d.is_verified?'✓ Verified':'Verification Pending')+'</span></div>\
+  '+(d.is_verified?'':'<div class="alert alert-warn">⚠ Your account is pending verification. You\'ll be notified at '+p.email+' within 1–3 business days.</div>')+'\
+  <div class="grid4" style="margin-bottom:1.5rem"><div class="stat-card"><div class="stat-val">'+(d.max_students||2)+'</div><div class="stat-lbl">Spots / Session</div></div><div class="stat-card"><div class="stat-val">'+(d.rating||'—')+'</div><div class="stat-lbl">Rating</div></div><div class="stat-card"><div class="stat-val">'+(d.review_count||0)+'</div><div class="stat-lbl">Reviews</div></div><div class="stat-card"><div class="stat-val">0</div><div class="stat-lbl">Pending Requests</div></div></div>\
+  <div class="card"><h3 style="margin-bottom:1rem">Quick Actions</h3><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-primary" onclick="setTab(\'dr-avail\')">📅 Set Availability</button><button class="btn btn-outline" onclick="setTab(\'dr-profile\')">👤 Update Profile</button><button class="btn btn-ghost" onclick="setTab(\'dr-students\')">👥 Review Requests</button></div></div>';
+}
+
+function contentDrProfile() {
+  var d=S.doctorData||{};
+  return '<div class="section-hdr"><h2 class="section-title">My Profile</h2><button class="btn btn-primary btn-sm" onclick="saveDrProfile()">✓ Save</button></div>\
+  <div class="grid2"><div class="card"><h3 style="margin-bottom:1.25rem">Practice Information</h3>\
+    <div class="form-group"><label>Full Name</label><input id="dp-name" value="'+(S.profile&&S.profile.full_name||'')+'"/></div>\
+    <div class="form-group"><label>Specialty</label><select id="dp-spec"><option>Cardiology</option><option>Orthopedics</option><option>Pediatrics</option><option>Emergency Medicine</option><option>Neurology</option><option>Surgery</option><option>Internal Medicine</option><option>Family Medicine</option></select></div>\
+    <div class="form-group"><label>Practice Name</label><input id="dp-pr" value="'+(d.practice_name||'')+'"/></div>\
+    <div class="form-group"><label>Practice Address</label><input id="dp-addr" value="'+(d.practice_address||'')+'"/></div>\
+    <div class="form-group"><label>Max Students / Session</label><select id="dp-mx"><option>1</option><option>2</option><option>3</option><option>4</option></select></div>\
+    <div class="form-group"><label>Bio</label><textarea id="dp-bio">'+(d.bio||'')+'</textarea></div></div>\
+  <div class="card"><h3 style="margin-bottom:1rem">Student Requirements</h3>\
+    '+['HIPAA Compliance Certificate','COVID-19 Vaccination','Influenza Vaccination','Background Check','Drug Screen','MMR Vaccination'].map(function(r){var checked=(d.requirements||[]).includes(r);return'<label style="display:flex;align-items:center;gap:10px;padding:10px;background:#F8FAFC;border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:14px;font-weight:500"><input type="checkbox" class="dr-req" value="'+r+'" style="width:auto;padding:0"'+(checked?' checked':'')+'>'+r+'</label>';}).join('')+'\
+    <div class="divider"></div><div class="form-group"><label>Max Students / Session</label><select id="dp-mx2"><option>1</option><option selected>2</option><option>3</option></select></div></div></div>';
+}
+
+function contentDrAvail() {
+  var days=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  var slots=['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
+  var avail=S.doctorAvail||[];
+  function isOn(day,time){return avail.some(function(a){return a.day_of_week===day&&a.start_time&&a.start_time.slice(0,5)===time&&a.is_active;});}
+  return '<div class="section-hdr"><h2 class="section-title">Availability</h2><button class="btn btn-primary btn-sm" onclick="saveAvail()">✓ Save Schedule</button></div>\
+  <div class="alert alert-info">💡 Students can only book during your active (ON) time slots. Click any slot to toggle.</div>\
+  <div class="card" style="overflow-x:auto"><table style="min-width:600px" id="avail-table">\
+    <thead><tr><th>Time</th>'+days.map(function(d){return'<th style="text-align:center">'+d.slice(0,3)+'</th>';}).join('')+'</tr></thead>\
+    <tbody>'+slots.map(function(slot){return'<tr><td style="font-size:13px;font-weight:600;color:#475569;white-space:nowrap">'+slot+'</td>'+days.map(function(day){var on=isOn(day,slot);return'<td style="text-align:center;padding:6px"><button class="avail-btn" data-day="'+day+'" data-time="'+slot+'" onclick="toggleSlot(this)" style="width:44px;height:30px;border-radius:6px;border:none;cursor:pointer;font-size:11px;font-weight:700;background:'+(on?'#0098B4':'#E2E8F0')+';color:'+(on?'#fff':'#94A3B8')+'">'+(on?'ON':'–')+'</button></td>';}).join('')+'</tr>';}).join('')+'</tbody></table></div>';
+}
+function toggleSlot(btn){var on=btn.textContent.trim()==='ON';btn.style.background=on?'#E2E8F0':'#0098B4';btn.style.color=on?'#94A3B8':'#fff';btn.textContent=on?'–':'ON';}
+
+function contentDrStudents() {
+  return '<div class="section-hdr"><h2 class="section-title">Student Requests</h2></div>\
+  <div class="card" style="padding:0;overflow:hidden"><table><thead><tr><th>Student</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>\
+  <tbody><tr><td colspan="4" style="text-align:center;padding:2rem;color:#475569">No pending requests yet. Requests appear here once your profile is verified and visible to students.</td></tr></tbody></table></div>';
+}
+
+// ─────────────────────────────────────────────
+// ADMIN CONTENT
+// ─────────────────────────────────────────────
+function contentAdminOverview() {
+  var st=S.adminStudents, dr=S.adminDoctors, vq=S.verifyQueue;
+  var rev=st.filter(function(s){return s.reg_fee_paid;}).length*10;
+  return '<div class="section-hdr"><h2 class="section-title">Admin Dashboard</h2><span class="badge badge-teal">'+ADMIN_EMAIL+'</span></div>\
+  <div class="grid4" style="margin-bottom:1.5rem">\
+    <div class="stat-card"><div class="stat-val">'+st.length+'</div><div class="stat-lbl">Students</div><div class="stat-sub">'+(st.filter(function(s){return s.verification_status==='pending';}).length)+' pending verification</div></div>\
+    <div class="stat-card"><div class="stat-val">'+dr.length+'</div><div class="stat-lbl">Physicians</div><div class="stat-sub">'+(dr.filter(function(d){return !d.is_verified;}).length)+' pending verification</div></div>\
+    <div class="stat-card"><div class="stat-val">$'+rev.toLocaleString()+'</div><div class="stat-lbl">Revenue</div><div class="stat-sub">Registration fees</div></div>\
+    <div class="stat-card"><div class="stat-val">'+vq.length+'</div><div class="stat-lbl">Docs to Review</div><div class="stat-sub">Awaiting approval</div></div>\
+  </div>\
+  <div class="grid2">\
+    <div class="card"><div class="section-hdr"><h3 style="font-family:serif;font-size:1.05rem">Recent Students</h3><button class="btn btn-sm btn-outline" onclick="setTab(\'admin-students\')">View All</button></div>\
+    '+(st.length===0?'<p style="color:#475569">No students yet.</p>':st.slice(0,4).map(function(s){var name=s.profiles&&s.profiles.full_name||'Unknown';return'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #E2E8F0"><div style="width:34px;height:34px;border-radius:50%;background:#0098B4;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">'+initials(name)+'</div><div style="flex:1"><p style="font-weight:600;font-size:14px">'+name+'</p><p style="font-size:12px;color:#475569">'+(s.profiles&&s.profiles.email||'')+'</p></div><span class="badge badge-'+(s.verification_status==='verified'?'green':s.verification_status==='pending'?'amber':'red')+'">'+s.verification_status+'</span></div>';}).join(''))+'\
+    </div>\
+    <div class="card"><div class="section-hdr"><h3 style="font-family:serif;font-size:1.05rem">Verify Queue</h3><button class="btn btn-sm btn-outline" onclick="setTab(\'admin-verify\')">View All</button></div>\
+    '+(vq.length===0?'<p style="color:#059669">🎉 All documents reviewed!</p>':vq.slice(0,4).map(function(q){var sname=q.students&&q.students.profiles?q.students.profiles.full_name:'Student';return'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #E2E8F0"><div style="width:10px;height:10px;border-radius:50%;background:#D97706;flex-shrink:0"></div><div style="flex:1"><p style="font-weight:600;font-size:14px">'+sname+'</p><p style="font-size:12px;color:#475569">'+q.document_name+'</p></div><button class="btn btn-sm btn-primary" onclick="setTab(\'admin-verify\')">Review</button></div>';}).join(''))+'\
+    </div>\
+  </div>';
+}
+
+function contentAdminStudents() {
+  var pending = S.adminStudents.filter(function(s){ return s.verification_status==='pending' || s.verification_status==='under_review'; });
+  var allSt = S.adminStudents;
+
+  var pendingHtml = '';
+  if (pending.length > 0) {
+    pendingHtml = '<div style="background:#FFFBEB;border:2px solid #D97706;border-radius:12px;padding:1.25rem;margin-bottom:1.5rem">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">' +
+        '<h3 style="font-family:serif;font-size:1rem;color:#D97706">⏳ Pending Verification ('+pending.length+')</h3>' +
+      '</div>' +
+      pending.map(function(s) {
+        var name  = (s.profiles && s.profiles.full_name)  || s.id.slice(0,8);
+        var email = (s.profiles && s.profiles.email)      || 'No email';
+        var date  = s.profiles && s.profiles.created_at ? new Date(s.profiles.created_at).toLocaleDateString() : '—';
+        return '<div style="display:flex;align-items:center;gap:12px;background:#fff;padding:12px;border-radius:8px;margin-bottom:8px;border:1px solid #E2E8F0">' +
+          '<div class="avatar" style="width:40px;height:40px;font-size:14px">'+initials(name)+'</div>' +
+          '<div style="flex:1;min-width:0">' +
+            '<strong style="font-size:14px">'+name+'</strong><br>' +
+            '<span style="font-size:13px;color:#475569">'+email+'</span><br>' +
+            '<span style="font-size:12px;color:#94A3B8">Registered '+date+'</span>' +
+          '</div>' +
+          '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+            '<button class="btn btn-sm btn-success" onclick="adminVerifyStudent(\''+s.id+'\')">✓ Verify</button>' +
+            '<button class="btn btn-sm btn-danger" onclick="adminRejectStudent(\''+s.id+'\')">✕ Reject</button>' +
+            '<button class="btn btn-sm btn-ghost" onclick="setTab(\'admin-verify\')">View Docs</button>' +
+          '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
+  var tableRows = allSt.length === 0
+    ? '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#475569">No students registered yet. Students appear here after registration.</td></tr>'
+    : allSt.map(function(s) {
+        var name  = (s.profiles && s.profiles.full_name)  || s.id.slice(0,8);
+        var email = (s.profiles && s.profiles.email)      || '—';
+        var date  = s.profiles && s.profiles.created_at ? new Date(s.profiles.created_at).toLocaleDateString() : '—';
+        return '<tr>' +
+          '<td><div style="display:flex;align-items:center;gap:8px">' +
+            '<div class="avatar" style="width:32px;height:32px;font-size:11px">'+initials(name)+'</div>' +
+            '<div><strong>'+name+'</strong><br><span style="font-size:12px;color:#475569">'+email+'</span></div>' +
+          '</div></td>' +
+          '<td><span class="badge badge-'+(s.verification_status==='verified'?'green':s.verification_status==='pending'?'amber':'red')+'">'+s.verification_status+'</span></td>' +
+          '<td><span class="badge badge-'+(s.reg_fee_paid?'green':'gray')+'">'+(s.reg_fee_paid?'Paid':'Free Promo')+'</span></td>' +
+          '<td style="font-size:13px;color:#475569">'+date+'</td>' +
+          '<td><div style="display:flex;gap:4px">' +
+            (s.verification_status!=='verified'?'<button class="btn btn-sm btn-success" onclick="adminVerifyStudent(\''+s.id+'\')">Verify</button>':'<span class="badge badge-green">✓ Done</span>') +
+            '<button class="btn btn-sm btn-ghost" onclick="adminNotify(\''+s.id+'\',\'Update\',\'Your account has been reviewed.\')">Notify</button>' +
+          '</div></td>' +
+        '</tr>';
+      }).join('');
+
+  return '<div class="section-hdr"><h2 class="section-title">Student Management</h2>' +
+    '<button class="btn btn-primary btn-sm" onclick="exportCsv()">Export CSV</button></div>' +
+    pendingHtml +
+    '<div class="card" style="padding:0;overflow:hidden"><table>' +
+    '<thead><tr><th>Student</th><th>Status</th><th>Fee</th><th>Joined</th><th>Actions</th></tr></thead>' +
+    '<tbody>'+tableRows+'</tbody></table></div>';
+}
+
+async function adminRejectStudent(id) {
+  var reason = prompt('Reason for rejection (sent to student):','Please resubmit with valid documentation.');
+  if (!reason) return;
+  try {
+    await S.db.from('students').update({verification_status:'rejected'}).eq('id',id);
+    await S.db.from('notifications').insert({user_id:id,title:'Verification Update',message:reason,type:'error'});
+    S.adminStudents=S.adminStudents.map(function(s){return s.id===id?Object.assign({},s,{verification_status:'rejected'}):s;});
+    render(); toast('Student rejected and notified.');
+  } catch(e) { toast(e.message,'error'); }
+}
+
+function contentAdminDoctors() {
+  var pending = S.adminDoctors.filter(function(d){ return !d.is_verified; });
+  var allDr = S.adminDoctors;
+
+  var pendingHtml = '';
+  if (pending.length > 0) {
+    pendingHtml = '<div style="background:#EFF6FF;border:2px solid #0098B4;border-radius:12px;padding:1.25rem;margin-bottom:1.5rem">' +
+      '<h3 style="font-family:serif;font-size:1rem;color:#0098B4;margin-bottom:1rem">⏳ Physicians Awaiting Verification ('+pending.length+')</h3>' +
+      pending.map(function(d) {
+        var name  = (d.profiles && d.profiles.full_name) || d.id.slice(0,8);
+        var email = (d.profiles && d.profiles.email)     || '—';
+        return '<div style="display:flex;align-items:center;gap:12px;background:#fff;padding:12px;border-radius:8px;margin-bottom:8px;border:1px solid #E2E8F0">' +
+          '<div class="avatar" style="width:40px;height:40px;font-size:14px;background:#0A2540">'+initials(name)+'</div>' +
+          '<div style="flex:1;min-width:0">' +
+            '<strong>'+name+'</strong><br>' +
+            '<span style="font-size:13px;color:#475569">'+email+'</span><br>' +
+            '<span style="font-size:12px;color:#94A3B8">'+(d.specialty||'No specialty set')+' · '+(d.practice_name||'No practice set')+'</span>' +
+          '</div>' +
+          '<div style="display:flex;gap:6px">' +
+            '<button class="btn btn-sm btn-success" onclick="adminVerifyDr(\''+d.id+'\')">✓ Verify</button>' +
+            '<button class="btn btn-sm btn-danger" onclick="adminToggleDr(\''+d.id+'\',false)">Reject</button>' +
+          '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
+  var tableRows = allDr.length === 0
+    ? '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#475569">No physicians registered yet.</td></tr>'
+    : allDr.map(function(d) {
+        var name  = (d.profiles && d.profiles.full_name) || d.id.slice(0,8);
+        var email = (d.profiles && d.profiles.email)     || '—';
+        return '<tr>' +
+          '<td><div style="display:flex;align-items:center;gap:8px">' +
+            '<div class="avatar" style="width:32px;height:32px;font-size:11px;background:#0A2540">'+initials(name)+'</div>' +
+            '<div><strong>'+name+'</strong><br><span style="font-size:12px;color:#475569">'+email+'</span></div>' +
+          '</div></td>' +
+          '<td style="font-size:13px">'+(d.specialty||'—')+'</td>' +
+          '<td><span class="badge badge-'+(d.is_verified?'green':'amber')+'">'+(d.is_verified?'Verified':'Pending')+'</span></td>' +
+          '<td><span class="badge badge-'+(d.is_accepting?'green':'gray')+'">'+(d.is_accepting?'Yes':'No')+'</span></td>' +
+          '<td><div style="display:flex;gap:4px">' +
+            (d.is_verified?''  :'<button class="btn btn-sm btn-success" onclick="adminVerifyDr(\''+d.id+'\')">Verify</button>') +
+            '<button class="btn btn-sm btn-ghost" onclick="adminToggleDr(\''+d.id+'\','+(d.is_accepting?'false':'true')+')">'+(d.is_accepting?'Pause':'Activate')+'</button>' +
+          '</div></td>' +
+        '</tr>';
+      }).join('');
+
+  return '<div class="section-hdr"><h2 class="section-title">Physician Management</h2>' +
+    '<button class="btn btn-primary btn-sm" onclick="setTab(\'admin-adddr\')">+ Add Physician</button></div>' +
+    pendingHtml +
+    '<div class="card" style="padding:0;overflow:hidden"><table>' +
+    '<thead><tr><th>Physician</th><th>Specialty</th><th>Verification</th><th>Accepting</th><th>Actions</th></tr></thead>' +
+    '<tbody>'+tableRows+'</tbody></table></div>';
+}
+
+
+function contentAdminVerify() {
+  // Group ALL documents by student
+  var allDocs = S.allDocs || [];
+  var queue   = S.verifyQueue || [];
+  var students = S.adminStudents;
+  var compReqs = S.compliance || [];
+
+  // Build doc map per student: { studentId: [doc, doc, ...] }
+  var docsByStudent = {};
+  allDocs.forEach(function(d) {
+    if (!docsByStudent[d.student_id]) docsByStudent[d.student_id] = [];
+    docsByStudent[d.student_id].push(d);
+  });
+
+  // Also include students who have pending docs but may not be in allDocs yet
+  // Build list of students who have ANY docs
+  var studentIdsWithDocs = Object.keys(docsByStudent);
+
+  // Count stats
+  var totalPending  = allDocs.filter(function(d){return d.status==='pending';}).length;
+  var totalVerified = allDocs.filter(function(d){return d.status==='verified';}).length;
+  var totalRejected = allDocs.filter(function(d){return d.status==='rejected';}).length;
+
+  var statusIcon = { verified:'✓', pending:'⏳', rejected:'✕', under_review:'👁' };
+  var statusColor = { verified:'#059669', pending:'#D97706', rejected:'#DC2626', under_review:'#0098B4' };
+  var badgeClass  = { verified:'badge-green', pending:'badge-amber', rejected:'badge-red', under_review:'badge-teal' };
+
+  var html =
+    '<div class="section-hdr">' +
+      '<h2 class="section-title">Document Verifications</h2>' +
+      '<button class="btn btn-primary btn-sm" onclick="refreshVerifyQueue()">↻ Refresh</button>' +
+    '</div>' +
+
+    // Stats row
+    '<div class="grid3" style="margin-bottom:1.5rem">' +
+      '<div class="stat-card"><div class="stat-val" style="color:#D97706">'+totalPending+'</div><div class="stat-lbl">Pending Review</div><div class="stat-sub">Need your action</div></div>' +
+      '<div class="stat-card"><div class="stat-val" style="color:#059669">'+totalVerified+'</div><div class="stat-lbl">Verified</div><div class="stat-sub">Approved documents</div></div>' +
+      '<div class="stat-card"><div class="stat-val" style="color:#DC2626">'+totalRejected+'</div><div class="stat-lbl">Rejected</div><div class="stat-sub">Need resubmission</div></div>' +
+    '</div>' +
+
+    // Compliance requirements reminder
+    (compReqs.length > 0 ?
+      '<div class="card" style="margin-bottom:1.5rem;background:#F0F9FF;border-color:#0098B4">' +
+        '<div style="font-weight:600;font-size:14px;color:#0098B4;margin-bottom:8px">📋 Platform Compliance Requirements ('+compReqs.length+' required)</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
+          compReqs.map(function(r){
+            return '<span class="badge badge-'+(r.is_mandatory?'red':'amber')+'" style="font-size:12px">'+
+              (r.is_mandatory?'Required':'Recommended')+': '+r.name+'</span>';
+          }).join('') +
+        '</div>' +
+      '</div>'
+    : '') +
+
+    // No docs at all
+    (allDocs.length === 0 && students.length === 0 ?
+      '<div class="card" style="text-align:center;padding:3rem;color:#475569">' +
+        '<div style="font-size:3rem;margin-bottom:1rem">📭</div>' +
+        '<h3 style="font-family:serif;margin-bottom:.5rem">No documents uploaded yet</h3>' +
+        '<p>Students will appear here once they register and upload their documents.</p>' +
+      '</div>'
+    :
+
+    // Show students with NO docs uploaded yet
+    (students.filter(function(s){ return !docsByStudent[s.id]; }).length > 0 ?
+      '<div class="card" style="margin-bottom:1.5rem;border:1px solid #E2E8F0">' +
+        '<div style="font-weight:600;font-size:14px;margin-bottom:10px;color:#94A3B8">👤 Students with No Documents Uploaded Yet</div>' +
+        students.filter(function(s){ return !docsByStudent[s.id]; }).map(function(s){
+          var name  = (s.profiles && s.profiles.full_name) || 'Unknown';
+          var email = (s.profiles && s.profiles.email)     || '—';
+          return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F1F5F9">' +
+            '<div class="avatar" style="width:34px;height:34px;font-size:12px">'+initials(name)+'</div>' +
+            '<div style="flex:1"><strong style="font-size:14px">'+name+'</strong> <span style="font-size:13px;color:#475569">'+email+'</span></div>' +
+            '<span class="badge badge-gray">No docs</span>' +
+          '</div>';
+        }).join('') +
+      '</div>'
+    : '') +
+
+    // Students WITH documents — show full compliance card per student
+    students.filter(function(s){ return !!docsByStudent[s.id]; }).map(function(s) {
+      var name   = (s.profiles && s.profiles.full_name) || 'Unknown';
+      var email  = (s.profiles && s.profiles.email)     || '—';
+      var docs   = docsByStudent[s.id] || [];
+      var hasPending   = docs.some(function(d){return d.status==='pending';});
+      var allVerified  = docs.length > 0 && docs.every(function(d){return d.status==='verified';});
+      var hasRejected  = docs.some(function(d){return d.status==='rejected';});
+      var borderColor  = hasPending?'#D97706':allVerified?'#059669':hasRejected?'#DC2626':'#E2E8F0';
+      var headerBg     = hasPending?'#FFFBEB':allVerified?'#F0FDF4':hasRejected?'#FEF2F2':'#F8FAFC';
+
+      return '<div class="card" style="margin-bottom:1rem;border:2px solid '+borderColor+'">' +
+
+        // Student header
+        '<div style="background:'+headerBg+';border-radius:10px 10px 0 0;padding:12px 1rem;margin:-1.5rem -1.5rem 1rem;display:flex;align-items:center;gap:12px">' +
+          '<div class="avatar" style="width:42px;height:42px;font-size:15px">'+initials(name)+'</div>' +
+          '<div style="flex:1">' +
+            '<strong style="font-size:15px">'+name+'</strong>' +
+            '<div style="font-size:13px;color:#475569">'+email+'</div>' +
+            '<div style="font-size:12px;color:#94A3B8;margin-top:2px">'+
+              docs.filter(function(d){return d.status==='verified';}).length+'/'+docs.length+' documents verified · ' +
+              'Account: <span style="color:'+(s.verification_status==='verified'?'#059669':'#D97706')+'">'+s.verification_status+'</span>' +
+            '</div>' +
+          '</div>' +
+          '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+            (s.verification_status!=='verified'?
+              '<button class="btn btn-sm btn-success" onclick="adminVerifyStudent(\''+s.id+'\')">✓ Verify Account</button>':
+              '<span class="badge badge-green">Account Verified</span>'
+            ) +
+            (hasPending?
+              '<button class="btn btn-sm btn-primary" onclick="adminApproveAllDocs(\''+s.id+'\')">✓ Approve All Pending</button>':''
+            ) +
+          '</div>' +
+        '</div>' +
+
+        // Compliance checklist
+        '<div style="margin-bottom:1rem">' +
+          '<div style="font-size:12px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Compliance Checklist</div>' +
+          compReqs.map(function(req) {
+            var matchingDoc = docs.find(function(d){
+              return d.document_name.toLowerCase().includes(req.name.toLowerCase().split(' ').slice(0,2).join(' ').toLowerCase()) ||
+                     d.document_type === req.document_type;
+            });
+            var status = matchingDoc ? matchingDoc.status : 'missing';
+            var icon   = status==='verified'?'✓':status==='pending'?'⏳':status==='rejected'?'✕':'✗';
+            var color  = status==='verified'?'#059669':status==='pending'?'#D97706':status==='rejected'?'#DC2626':'#94A3B8';
+            return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #F1F5F9">' +
+              '<span style="color:'+color+';font-weight:700;width:16px;text-align:center">'+icon+'</span>' +
+              '<span style="font-size:13px;color:#1E293B;flex:1">'+req.name+'</span>' +
+              '<span class="badge badge-'+( status==='verified'?'green':status==='pending'?'amber':status==='rejected'?'red':'gray' )+'">'+
+                (status==='missing'?'Not uploaded':status)+
+              '</span>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+
+        // Documents list
+        '<div style="font-size:12px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Uploaded Documents</div>' +
+        docs.map(function(d) {
+          var icon  = statusIcon[d.status]  || '?';
+          var color = statusColor[d.status] || '#94A3B8';
+          var badge = badgeClass[d.status]  || 'badge-gray';
+          return '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#F8FAFC;border-radius:8px;margin-bottom:6px;border:1px solid #E2E8F0">' +
+            '<span style="color:'+color+';font-weight:700;font-size:16px;width:20px;text-align:center">'+icon+'</span>' +
+            '<div style="flex:1;min-width:0">' +
+              '<div style="font-weight:600;font-size:13px">'+d.document_name+'</div>' +
+              '<div style="font-size:12px;color:#94A3B8">'+d.document_type+' · Uploaded '+new Date(d.created_at).toLocaleDateString()+'</div>' +
+              (d.review_notes?'<div style="font-size:12px;color:#DC2626;margin-top:2px">Note: '+d.review_notes+'</div>':'') +
+            '</div>' +
+            '<span class="badge '+badge+'">'+d.status+'</span>' +
+            '<div style="display:flex;gap:4px">' +
+              (d.file_path?'<button class="btn btn-sm btn-ghost" onclick="adminViewDoc(\''+d.file_path+'\')">👁</button>':'') +
+              (d.status==='pending'?
+                '<button class="btn btn-sm btn-success" onclick="adminApprove(\''+d.id+'\',\''+d.student_id+'\')">✓</button>' +
+                '<button class="btn btn-sm btn-danger"  onclick="adminReject(\''+d.id+'\',\''+d.student_id+'\')">✕</button>'
+              :'') +
+              (d.status==='rejected'?
+                '<span style="font-size:12px;color:#DC2626">Resubmission required</span>'
+              :'') +
+            '</div>' +
+          '</div>';
+        }).join('') +
+
+      '</div>';
+    }).join('')
+
+    ); // end conditional
+
+  return html;
+}
+
+// Approve all pending docs for a student at once
+async function adminApproveAllDocs(studentId) {
+  if (!confirm('Approve ALL pending documents for this student?')) return;
+  try {
+    var pending = (S.allDocs||[]).filter(function(d){return d.student_id===studentId && d.status==='pending';});
+    for (var i=0; i<pending.length; i++) {
+      await S.db.from('student_documents').update({
+        status:'verified', review_notes:'Approved by admin.',
+        reviewed_by:S.user.id, reviewed_at:new Date().toISOString()
+      }).eq('id',pending[i].id);
+    }
+    await S.db.from('notifications').insert({
+      user_id:studentId, title:'Documents Verified ✓',
+      message:'All your uploaded documents have been approved! You can now enroll in shadowing opportunities.',
+      type:'success'
+    });
+    await refreshVerifyQueue();
+    toast('All documents approved and student notified!');
+  } catch(e) { toast(e.message||'Approve failed','error'); }
+}
+
+// Refresh verify queue without full page reload
+async function refreshVerifyQueue() {
+  try {
+    var allDocs = (await S.db.from('student_documents').select('*').order('created_at',{ascending:false})).data || [];
+    S.allDocs = allDocs;
+    S.verifyQueue = allDocs.filter(function(d){return d.status==='pending';}).map(function(d){
+      var prof = {};
+      S.adminStudents.forEach(function(s){ if(s.id===d.student_id) prof=s.profiles||{}; });
+      return Object.assign({},d,{students:{profiles:prof}});
+    });
+    render();
+    toast('Refreshed!');
+  } catch(e) { toast(e.message||'Refresh failed','error'); }
+}
+
+
+function contentAdminCourses() {
+  return '<div class="section-hdr"><h2 class="section-title">Manage Courses</h2><button class="btn btn-primary btn-sm" onclick="openCourseModal()">+ Add Course</button></div>' +
+  '<div class="tabs" id="course-admin-tabs">' +
+  '<div class="tab active" data-cat="Required" onclick="filterAdminCourses(this)">Required</div>' +
+  '<div class="tab" data-cat="Recommended" onclick="filterAdminCourses(this)">Recommended</div>' +
+  '<div class="tab" data-cat="Elective" onclick="filterAdminCourses(this)">Elective</div>' +
+  '<div class="tab" data-cat="All" onclick="filterAdminCourses(this)">All</div>' +
+  '</div>' +
+  '<div class="grid3" id="admin-course-grid">' +
+  (S.courses.length===0?'<p style="color:#475569">No courses yet. Click + Add Course to create one.</p>':
+  S.courses.map(function(c){return(
+    '<div class="course-card" data-cat="'+c.category+'" style="'+(c.is_active?'':'opacity:.5')+'">'+
+    '<div style="height:80px;display:flex;align-items:center;justify-content:center;font-size:2.2rem;background:'+(c.color_hex||'#0891B2')+'20;position:relative">'+
+      (c.emoji||'📚')+
+      '<span style="position:absolute;top:8px;right:8px" class="badge '+(c.is_active?'badge-green':'badge-gray')+'">'+(c.is_active?'Live':'Archived')+'</span>'+
+    '</div>'+
+    '<div style="padding:1rem">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:4px">'+
+        '<h3 style="font-size:13px;font-weight:700;line-height:1.3">'+c.title+'</h3>'+
+        '<span class="badge '+(c.category==='Required'?'badge-red':c.category==='Recommended'?'badge-amber':'badge-gray')+'" style="font-size:10px;flex-shrink:0">'+c.category+'</span>'+
+      '</div>'+
+      '<div style="font-size:12px;color:#94A3B8;margin-bottom:8px">⏰ '+c.duration_hrs+'h · 📖 '+c.lesson_count+' lessons · '+(c.price_cents===0?'Free':'$'+(c.price_cents/100).toFixed(2))+'</div>'+
+      '<div style="display:flex;gap:6px">'+
+        '<button class="btn btn-sm btn-outline" style="flex:1" data-action="edit" data-id="'+c.id+'">✏ Edit</button>'+
+        '<button class="btn btn-sm btn-ghost" data-action="toggle" data-id="'+c.id+'" data-val="'+(c.is_active?'0':'1')+'">'+(c.is_active?'Archive':'Restore')+'</button>'+
+        '<button class="btn btn-sm btn-danger" data-action="delete" data-id="'+c.id+'" data-name="'+c.title+'">🗑</button>'+
+      '</div>'+
+    '</div></div>'
+  );}).join('')) + '</div>';
+}
+
+function filterAdminCourses(el) {
+  var cat = el.dataset.cat || 'All';
+  el.closest('.tabs').querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  document.querySelectorAll('#admin-course-grid .course-card').forEach(function(c){
+    c.style.display=(cat==='All'||c.dataset.cat===cat)?'':'none';
+  });
+}
+
+function contentAdminCompliance() {
+  var reqs = S.compliance;
+  return '<div class="section-hdr"><h2 class="section-title">Compliance Rules</h2><button class="btn btn-primary btn-sm" onclick="openComplianceModal()">+ Add Requirement</button></div>'+
+  '<div class="alert alert-info">💡 These apply to ALL students platform-wide. Physicians can add their own additional requirements.</div>'+
+  (reqs.length===0?'<div class="card" style="text-align:center;padding:2rem;color:#475569">No compliance requirements yet. Click + Add Requirement.</div>':
+  reqs.map(function(r){return(
+    '<div class="card" style="margin-bottom:10px;padding:1rem">'+
+    '<div style="display:flex;align-items:flex-start;gap:12px">'+
+      '<div style="width:42px;height:42px;border-radius:10px;background:#E0F5FA;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.2rem">🛡</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">'+
+          '<strong style="font-size:14px">'+r.name+'</strong>'+
+          '<div style="display:flex;gap:6px;align-items:center">'+
+            '<span class="badge '+(r.is_mandatory?'badge-red':'badge-amber')+'">'+(r.is_mandatory?'Required':'Recommended')+'</span>'+
+            '<button class="btn btn-sm btn-outline" data-action="edit-comp" data-id="'+r.id+'">✏ Edit</button>'+
+            '<button class="btn btn-sm btn-danger" data-action="del-comp" data-id="'+r.id+'">🗑</button>'+
+          '</div>'+
+        '</div>'+
+        '<p style="font-size:13px;color:#475569;margin-top:4px">'+(r.description||'No description set.')+'</p>'+
+        '<div style="font-size:12px;color:#94A3B8;margin-top:4px">Type: '+(r.document_type||'General')+'</div>'+
+      '</div>'+
+    '</div></div>'
+  );}).join(''));
+}
+
+function contentAdminAnnounce() {
+  var anns = S.announcements || [];
+  return '<div class="section-hdr"><h2 class="section-title">Announcements</h2><button class="btn btn-primary btn-sm" onclick="openAnnounceModal()">+ New Announcement</button></div>'+
+  '<div class="alert alert-info">💡 Announcements are shown as banners to all students and doctors when they log in.</div>'+
+  (anns.length===0?'<div class="card" style="text-align:center;padding:2rem;color:#475569">No announcements yet.</div>':
+  anns.map(function(a){return(
+    '<div class="card" style="margin-bottom:10px;padding:1rem">'+
+    '<div style="display:flex;align-items:flex-start;gap:12px">'+
+      '<div style="font-size:1.5rem">'+(a.type==='warning'?'⚠️':a.type==='success'?'✅':'📢')+'</div>'+
+      '<div style="flex:1">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">'+
+          '<strong>'+a.title+'</strong>'+
+          '<div style="display:flex;gap:6px">'+
+            '<span class="badge badge-'+(a.is_active?'green':'gray')+'">'+(a.is_active?'Live':'Hidden')+'</span>'+
+            '<button class="btn btn-sm btn-outline" data-action="edit-ann" data-id="'+a.id+'">✏ Edit</button>'+
+            '<button class="btn btn-sm btn-danger" data-action="del-ann" data-id="'+a.id+'">🗑</button>'+
+          '</div>'+
+        '</div>'+
+        '<p style="font-size:13px;color:#475569;margin-top:4px">'+a.message+'</p>'+
+        '<div style="font-size:12px;color:#94A3B8;margin-top:4px">'+new Date(a.created_at).toLocaleDateString()+'</div>'+
+      '</div>'+
+    '</div></div>'
+  );}).join(''));
+}
+
+function contentAdminSettings() {
+  return '<div class="section-hdr"><h2 class="section-title">Platform Settings</h2><button class="btn btn-primary btn-sm" onclick="saveSettings()">✓ Save All Settings</button></div>'+
+  '<div class="grid2">'+
+    '<div class="card">'+
+      '<h3 style="font-family:serif;margin-bottom:1.25rem">Registration Settings</h3>'+
+      '<div class="form-group"><label>Registration Mode</label>'+
+        '<select id="s-reg-mode"><option value="free" selected>Free (current promo)</option><option value="paid">Paid ($10 fee)</option><option value="invite">Invite Only</option></select>'+
+      '</div>'+
+      '<div class="form-group"><label>Registration Fee ($)</label><input id="s-reg-fee" type="number" value="10" min="0"/></div>'+
+      '<div class="form-group"><label>Require Admin Approval for Students</label>'+
+        '<select id="s-approve-students"><option value="yes" selected>Yes — manual verification</option><option value="no">No — auto-approve</option></select>'+
+      '</div>'+
+      '<div class="form-group"><label>Require Admin Approval for Physicians</label>'+
+        '<select id="s-approve-doctors"><option value="yes" selected>Yes — manual verification</option><option value="no">No — auto-approve</option></select>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card">'+
+      '<h3 style="font-family:serif;margin-bottom:1.25rem">Platform Info</h3>'+
+      '<div class="form-group"><label>Platform Name</label><input id="s-name" value="MedShadow"/></div>'+
+      '<div class="form-group"><label>Admin Email</label><input id="s-email" value="medshadoww@gmail.com"/></div>'+
+      '<div class="form-group"><label>Site URL</label><input id="s-url" value="https://medshadow.netlify.app"/></div>'+
+      '<div class="form-group"><label>Welcome Message (shown on landing page)</label>'+
+        '<textarea id="s-welcome">Connect with verified physicians, complete HIPAA training, and track every shadowing hour — all in one platform.</textarea>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card">'+
+      '<h3 style="font-family:serif;margin-bottom:1.25rem">Shadowing Settings</h3>'+
+      '<div class="form-group"><label>Min Hours per Session</label><input id="s-min-hrs" type="number" value="4" min="1"/></div>'+
+      '<div class="form-group"><label>Max Sessions per Student (per month)</label><input id="s-max-sess" type="number" value="8" min="1"/></div>'+
+      '<div class="form-group"><label>Allow Students to Cancel Sessions</label>'+
+        '<select id="s-cancel"><option value="yes" selected>Yes</option><option value="no">No</option></select>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card">'+
+      '<h3 style="font-family:serif;margin-bottom:1.25rem">Required Documents</h3>'+
+      '<p style="font-size:13px;color:#475569;margin-bottom:1rem">Students must upload these before enrolling:</p>'+
+      ['COVID-19 Vaccination','MMR Vaccination','Influenza Vaccination','Background Check','Student ID / Transcript'].map(function(d){
+        return '<label style="display:flex;align-items:center;gap:10px;padding:8px;background:#F8FAFC;border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:14px;font-weight:500"><input type="checkbox" checked style="width:auto;padding:0"> '+d+'</label>';
+      }).join('')+
+      '<button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="openComplianceModal()">+ Add Document Type</button>'+
+    '</div>'+
+  '</div>';
+}
+
+function contentAdminPayments() {
+  var paid=S.adminStudents.filter(function(s){return s.reg_fee_paid;});
+  return '<div class="section-hdr"><h2 class="section-title">Payments & Revenue</h2></div>\
+  <div class="grid3" style="margin-bottom:1.5rem">\
+    <div class="stat-card"><div class="stat-val">$'+(paid.length*10).toLocaleString()+'</div><div class="stat-lbl">Total Revenue</div><div class="stat-sub">Registration fees</div></div>\
+    <div class="stat-card"><div class="stat-val">'+paid.length+'</div><div class="stat-lbl">Paid Students</div></div>\
+    <div class="stat-card"><div class="stat-val">'+S.adminStudents.filter(function(s){return !s.reg_fee_paid;}).length+'</div><div class="stat-lbl">Unpaid</div></div>\
+  </div>\
+  <div class="card" style="padding:0;overflow:hidden"><table>\
+    <thead><tr><th>Student</th><th>Type</th><th>Amount</th><th>Date</th></tr></thead><tbody>\
+    '+(paid.length===0?'<tr><td colspan="4" style="text-align:center;padding:2rem;color:#475569">No payments yet.</td></tr>':paid.map(function(s){return'<tr><td><strong>'+(s.profiles&&s.profiles.full_name||'Unknown')+'</strong></td><td><span class="badge badge-teal">Registration</span></td><td><strong>$10.00</strong></td><td style="font-size:13px;color:#475569">'+new Date(s.reg_fee_paid_at||Date.now()).toLocaleDateString()+'</td></tr>';}).join(''))+'</tbody></table></div>';
+}
+
+// ─────────────────────────────────────────────
+// DATA ACTIONS
+// ─────────────────────────────────────────────
+async function loadDashData() {
+  if (!S.db) return;
+  try {
+    if (S.role==='student') {
+      var [dr,cr,cm,docs,enr] = await Promise.allSettled([
+        S.db.from('doctors').select('*,profiles:id(full_name,email),doctor_availability(day_of_week,start_time,end_time,is_active)').eq('is_verified',true).eq('is_accepting',true).order('rating',{ascending:false}),
+        S.db.from('courses').select('*').eq('is_active',true).order('sort_order'),
+        S.db.from('compliance_requirements').select('*').eq('scope','global'),
+        S.db.from('student_documents').select('*').eq('student_id',S.user.id).order('created_at',{ascending:false}),
+        S.db.from('shadowing_enrollments').select('*,doctors:doctor_id(specialty,practice_name,profiles:id(full_name))').eq('student_id',S.user.id).order('session_date',{ascending:false}),
+      ]);
+      S.doctors    = dr.status==='fulfilled'&&dr.value.data   ? dr.value.data   : [];
+      S.courses    = cr.status==='fulfilled'&&cr.value.data   ? cr.value.data   : [];
+      S.compliance = cm.status==='fulfilled'&&cm.value.data   ? cm.value.data   : [];
+      S.documents  = docs.status==='fulfilled'&&docs.value.data ? docs.value.data : [];
+      S.enrollments= enr.status==='fulfilled'&&enr.value.data ? enr.value.data  : [];
+    } else if (S.role==='doctor') {
+      var [dRes,avRes,crRes] = await Promise.allSettled([
+        S.db.from('doctors').select('*').eq('id',S.user.id).single(),
+        S.db.from('doctor_availability').select('*').eq('doctor_id',S.user.id),
+        S.db.from('courses').select('*').eq('is_active',true).order('sort_order'),
+      ]);
+      S.doctorData = dRes.status==='fulfilled' ? dRes.value.data : null;
+      S.doctorAvail= avRes.status==='fulfilled'&&avRes.value.data ? avRes.value.data : [];
+      S.courses    = crRes.status==='fulfilled'&&crRes.value.data ? crRes.value.data : [];
+    } else if (S.role==='admin') {
+      // Fetch profiles + students + doctors separately then merge
+      // (avoids FK join issues with Supabase PostgREST)
+      var allProfiles = (await S.db.from('profiles').select('*').order('created_at',{ascending:false})).data || [];
+      var allStudents = (await S.db.from('students').select('*').order('created_at',{ascending:false})).data || [];
+      var allDoctors  = (await S.db.from('doctors').select('*').order('created_at',{ascending:false})).data || [];
+      var allDocs     = (await S.db.from('student_documents').select('*').order('created_at',{ascending:false})).data || [];
+
+      // Build profile lookup map
+      var profileMap = {};
+      allProfiles.forEach(function(p){ profileMap[p.id] = p; });
+
+      // Merge profiles into students
+      S.adminStudents = allStudents.map(function(s){
+        return Object.assign({}, s, { profiles: profileMap[s.id] || {} });
+      });
+
+      // Merge profiles into doctors
+      S.adminDoctors = allDoctors.map(function(d){
+        return Object.assign({}, d, { profiles: profileMap[d.id] || {} });
+      });
+
+      // Store ALL docs (not just pending) for compliance view
+      S.allDocs = allDocs;
+
+      // Build verify queue — pending docs with student profile attached
+      S.verifyQueue = allDocs
+        .filter(function(d){ return d.status === 'pending'; })
+        .map(function(d){
+          var prof = profileMap[d.student_id] || {};
+          return Object.assign({}, d, {
+            students: { profiles: prof }
+          });
+        });
+
+      // Also fetch courses, compliance, announcements
+      var [crRes,cmRes,annRes] = await Promise.all([
+        S.db.from('courses').select('*').order('sort_order'),
+        S.db.from('compliance_requirements').select('*').eq('scope','global'),
+        S.db.from('announcements').select('*').order('created_at',{ascending:false}),
+      ]);
+      S.courses       = crRes.data || [];
+      S.compliance    = cmRes.data || [];
+      S.announcements = annRes.data || [];
+
+      // Load availability for all doctors
+      var availRes = await S.db.from('doctor_availability').select('*');
+      S.adminAvail = availRes.data || [];
+
+      // Load all enrollments with student+doctor profiles merged
+      var enrRes  = await S.db.from('shadowing_enrollments').select('*').order('session_date',{ascending:false});
+      var enrData = enrRes.data || [];
+      S.adminEnrollments = enrData.map(function(e){
+        return Object.assign({}, e, {
+          studentProfile: profileMap[e.student_id] || {},
+          doctorProfile:  profileMap[e.doctor_id]  || {}
+        });
+      });
+    }
+  } catch(e) { console.warn('loadDashData error:', e); }
+}
+
+async function doSignOut() {
+  if (S.db) await S.db.auth.signOut();
+  S.user=null; S.profile=null; S.role=null; S.tab='';
+  showPage('landing'); toast('Signed out successfully.');
+}
+
+async function enrollDoc(doctorId, name) {
+  if (!S.db) { toast('Not connected','error'); return; }
+  try {
+    var d=new Date(); d.setDate(d.getDate()+(8-d.getDay())%7||7);
+    await S.db.from('shadowing_enrollments').insert({student_id:S.user.id,doctor_id:doctorId,session_date:d.toISOString().split('T')[0],start_time:'08:00',end_time:'12:00',status:'pending'});
+    S.enrollments = (await S.db.from('shadowing_enrollments').select('*,doctors:doctor_id(specialty,practice_name,profiles:id(full_name))').eq('student_id',S.user.id).order('session_date',{ascending:false})).data || [];
+    toast('Enrollment request sent to '+name+'! Awaiting approval.');
+  } catch(e) { toast(e.message||'Enrollment failed','error'); }
+}
+
+async function cancelEnr(id) {
+  if (!confirm('Cancel this session?')) return;
+  await S.db.from('shadowing_enrollments').update({status:'cancelled'}).eq('id',id);
+  S.enrollments = S.enrollments.map(function(e){return e.id===id?Object.assign({},e,{status:'cancelled'}):e;});
+  render(); toast('Session cancelled.');
+}
+
+async function handleDocUp(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+
+  // Validate
+  if (file.size > 10 * 1024 * 1024) { toast('File too large. Max 10MB.', 'error'); return; }
+  var allowed = ['pdf','jpg','jpeg','png','gif','heic','doc','docx'];
+  var ext = file.name.split('.').pop().toLowerCase();
+  if (!allowed.includes(ext)) { toast('File type not allowed. Use PDF, JPG, or PNG.', 'error'); return; }
+  if (!S.user) { toast('Please sign in first.', 'error'); return; }
+
+  var name = ($('doc-name') && $('doc-name').value.trim()) || file.name.replace(/\.[^.]+$/, '');
+  var type = ($('doc-type') && $('doc-type').value) || 'Other';
+  if (!name) { toast('Please enter a document name first.', 'error'); return; }
+
+  // Disable upload zones to prevent double-click
+  var zones = document.querySelectorAll('.upload-zone');
+  zones.forEach(function(z){ z.style.pointerEvents='none'; z.style.opacity='.6'; });
+  toast('Uploading...', 'info');
+
+  try {
+    var safeName = name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 50);
+    var filePath  = 'no-storage/' + S.user.id + '_' + Date.now() + '_' + safeName + '.' + ext;
+
+    // Try storage upload first — but never block if it fails
+    try {
+      var storagePath = S.user.id + '/' + Date.now() + '_' + safeName + '.' + ext;
+      var up = await S.db.storage.from('student-documents').upload(storagePath, file, { upsert: false });
+      if (!up.error) {
+        filePath = storagePath; // use real path if storage worked
+      } else {
+        console.warn('Storage upload skipped:', up.error.message);
+      }
+    } catch(storageErr) {
+      console.warn('Storage not available:', storageErr.message);
+    }
+
+    // Always save record to database
+    var ins = await S.db.from('student_documents').insert({
+      student_id:    S.user.id,
+      document_name: name,
+      document_type: type,
+      file_path:     filePath,
+      file_name:     file.name,
+      file_size:     file.size,
+      status:        'pending'
+    });
+
+    if (ins.error) {
+      throw new Error('Could not save document: ' + ins.error.message);
+    }
+
+    // Refresh document list
+    var fresh = await S.db.from('student_documents')
+      .select('*')
+      .eq('student_id', S.user.id)
+      .order('created_at', { ascending: false });
+    S.documents = fresh.data || [];
+
+    // Clear name field for next upload
+    if ($('doc-name')) $('doc-name').value = '';
+
+    render();
+    toast(name + ' uploaded! Admin will verify it shortly.');
+
+  } catch(e) {
+    console.error('Upload error:', e);
+    toast(e.message || 'Upload failed. Please try again.', 'error');
+  } finally {
+    // Re-enable upload zones
+    zones.forEach(function(z){ z.style.pointerEvents=''; z.style.opacity=''; });
+  }
+}
+
+
+function setDocQuick(name, type) {
+  // Pre-fill name and type, then trigger file picker
+  var nameEl = $('doc-name'); var typeEl = $('doc-type');
+  if (nameEl) nameEl.value = name;
+  if (typeEl) typeEl.value = type;
+  var picker = $('doc-up-zone');
+  if (picker) picker.click();
+}
+
+async function enrCourse(id,title,price) {
+  if (!S.db) { toast('Not connected','error'); return; }
+  if (price>0) { toast('Redirecting to payment for "'+title+'" — $'+(price/100).toFixed(2), 'info'); return; }
+  try {
+    await S.db.from('course_enrollments').upsert({student_id:S.user.id,course_id:id,status:'enrolled'});
+    toast('Enrolled in "'+title+'"! Start learning now.');
+    S.courseEnr=(await S.db.from('course_enrollments').select('*').eq('student_id',S.user.id)).data||[];
+    render();
+  } catch(e) { toast(e.message||'Enrollment failed','error'); }
+}
+
+async function saveProfile() {
+  var name=$('prof-name')&&$('prof-name').value; var phone=$('prof-phone')&&$('prof-phone').value;
+  await S.db.from('profiles').update({full_name:name,phone:phone}).eq('id',S.user.id);
+  S.profile=Object.assign({},S.profile,{full_name:name,phone:phone});
+  render(); toast('Profile saved!');
+}
+
+async function saveDrProfile() {
+  var reqs=[].slice.call(document.querySelectorAll('.dr-req:checked')).map(function(el){return el.value;});
+  await Promise.all([
+    S.db.from('profiles').update({full_name:$('dp-name')&&$('dp-name').value}).eq('id',S.user.id),
+    S.db.from('doctors').upsert({id:S.user.id,specialty:$('dp-spec')&&$('dp-spec').value,practice_name:$('dp-pr')&&$('dp-pr').value,practice_address:$('dp-addr')&&$('dp-addr').value,max_students:parseInt($('dp-mx')&&$('dp-mx').value)||2,bio:$('dp-bio')&&$('dp-bio').value,requirements:reqs})
+  ]);
+  toast('Profile saved!');
+}
+
+async function saveAvail() {
+  var slots=[];
+  document.querySelectorAll('.avail-btn').forEach(function(btn){ if(btn.textContent.trim()==='ON'){var t=btn.dataset.time;var eh=String(parseInt(t)+1).padStart(2,'0');slots.push({doctor_id:S.user.id,day_of_week:btn.dataset.day,start_time:t+':00',end_time:eh+':00:00',is_active:true});}});
+  await S.db.from('doctor_availability').delete().eq('doctor_id',S.user.id);
+  if (slots.length>0) await S.db.from('doctor_availability').insert(slots);
+  S.doctorAvail=slots; toast('Availability saved!');
+}
+
+async function adminVerifyStudent(id) {
+  await S.db.from('students').update({verification_status:'verified'}).eq('id',id);
+  await S.db.from('notifications').insert({user_id:id,title:'Account Verified ✓',message:'Your student account has been verified! You can now enroll in shadowing opportunities.',type:'success'});
+  S.adminStudents=S.adminStudents.map(function(s){return s.id===id?Object.assign({},s,{verification_status:'verified'}):s;});
+  render(); toast('Student verified and notified!');
+}
+
+async function adminVerifyDr(id) {
+  await S.db.from('doctors').update({is_verified:true,verification_status:'verified'}).eq('id',id);
+  await S.db.from('notifications').insert({user_id:id,title:'Account Verified 🎉',message:'Your physician account is verified! Set your availability to start accepting students.',type:'success'});
+  S.adminDoctors=S.adminDoctors.map(function(d){return d.id===id?Object.assign({},d,{is_verified:true,verification_status:'verified'}):d;});
+  render(); toast('Physician verified!');
+}
+
+async function adminToggleDr(id,val) {
+  val=val==='true'||val===true;
+  await S.db.from('doctors').update({is_accepting:val}).eq('id',id);
+  S.adminDoctors=S.adminDoctors.map(function(d){return d.id===id?Object.assign({},d,{is_accepting:val}):d;});
+  render(); toast('Physician '+(val?'activated':'paused')+'.');
+}
+
+async function adminNotify(uid,title,msg) {
+  await S.db.from('notifications').insert({user_id:uid,title:title,message:msg,type:'info'});
+  toast('Notification sent!');
+}
+
+async function adminApprove(docId,studentId) {
+  try {
+    await S.db.from('student_documents').update({status:'verified',review_notes:'Approved by admin.',reviewed_by:S.user.id,reviewed_at:new Date().toISOString()}).eq('id',docId);
+    await S.db.from('notifications').insert({user_id:studentId,title:'Document Verified ✓',message:'One of your documents has been approved! Please continue uploading any remaining required documents.',type:'success'});
+    // Update local state
+    S.allDocs = (S.allDocs||[]).map(function(d){return d.id===docId?Object.assign({},d,{status:'verified',review_notes:'Approved by admin.'}):d;});
+    S.verifyQueue = S.verifyQueue.filter(function(q){return q.id!==docId;});
+    render(); toast('Document approved and student notified!');
+  } catch(e) { toast(e.message||'Approve failed','error'); }
+}
+
+async function adminReject(docId,studentId) {
+  var reason=prompt('Reason for rejection (student will see this):','Document is unclear or incomplete. Please re-upload a clearer version.');
+  if (reason===null) return;
+  try {
+    await S.db.from('student_documents').update({status:'rejected',review_notes:reason,reviewed_by:S.user.id,reviewed_at:new Date().toISOString()}).eq('id',docId);
+    await S.db.from('notifications').insert({user_id:studentId,title:'Document Needs Resubmission',message:'A document was rejected: '+reason+'. Please log in and re-upload under Documents.',type:'error'});
+    S.allDocs = (S.allDocs||[]).map(function(d){return d.id===docId?Object.assign({},d,{status:'rejected',review_notes:reason}):d;});
+    S.verifyQueue = S.verifyQueue.filter(function(q){return q.id!==docId;});
+    render(); toast('Document rejected and student notified.');
+  } catch(e) { toast(e.message||'Reject failed','error'); }
+}
+
+async function adminViewDoc(path) {
+  var res=await S.db.storage.from('student-documents').createSignedUrl(path,3600);
+  if (res.data&&res.data.signedUrl) window.open(res.data.signedUrl,'_blank');
+}
+
+// MODAL SYSTEM
+var _modalSaveFn = null;
+function showModal(title, bodyHtml, saveFn, saveLabel) {
+  var overlay = $('modal-overlay');
+  $('modal-title').textContent = title;
+  $('modal-body').innerHTML = bodyHtml;
+  // Always reset the button — key fix for re-opening modal after failed save
+  var saveBtn = $('modal-save-btn');
+  if (saveBtn) { saveBtn.textContent = saveLabel || 'Save'; saveBtn.disabled = false; }
+  _modalSaveFn = saveFn;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  $('modal-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+  _modalSaveFn = null;
+}
+function modalSave() { if (_modalSaveFn) _modalSaveFn(); }
+document.addEventListener('click', function(e) {
+  if (e.target && e.target.id === 'modal-overlay') { closeModal(); return; }
+
+  var btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  var action = btn.dataset.action;
+  var id     = btn.dataset.id;
+
+  if (action === 'edit')       openCourseModal(id);
+  if (action === 'toggle')     adminToggleCourse(id, btn.dataset.val === '1');
+  if (action === 'delete')     adminDeleteCourse(id, btn.dataset.name || 'this course');
+  if (action === 'edit-comp')  openComplianceModal(id);
+  if (action === 'del-comp') {
+    var name = btn.closest('.card') && btn.closest('.card').querySelector('strong') && btn.closest('.card').querySelector('strong').textContent || 'this item';
+    adminDeleteCompliance(id, name);
+  }
+  if (action === 'edit-ann')   openAnnounceModal(id);
+  if (action === 'del-ann')    adminDeleteAnnounce(id);
+});
+
+// COURSE CRUD
+function openCourseModal(id) {
+  var c = id ? S.courses.find(function(x){return x.id===id;}) : null;
+  var body =
+    '<div class="form-row"><div class="form-group"><label>Course Title</label><input id="cm-title" value="'+(c?c.title:'')+'" placeholder="HIPAA Compliance Certification"/></div>'+
+    '<div class="form-group"><label>Category</label><select id="cm-cat">'+
+    ['Required','Recommended','Elective'].map(function(cat){return '<option value="'+cat+'"'+(c&&c.category===cat?' selected':'')+'>'+cat+'</option>';}).join('')+
+    '</select></div></div>'+
+    '<div class="form-group"><label>Description</label><textarea id="cm-desc" style="min-height:70px">'+(c?c.description||'':'')+'</textarea></div>'+
+    '<div class="form-row"><div class="form-group"><label>Duration (hours)</label><input id="cm-hrs" type="number" step="0.5" value="'+(c?c.duration_hrs:2)+'"/></div>'+
+    '<div class="form-group"><label>Number of Lessons</label><input id="cm-lessons" type="number" value="'+(c?c.lesson_count:6)+'"/></div></div>'+
+    '<div class="form-row"><div class="form-group"><label>Price (0 = free)</label><input id="cm-price" type="number" step="0.01" value="'+(c?c.price_cents/100:0)+'"/></div>'+
+    '<div class="form-group"><label>Emoji Icon</label><input id="cm-emoji" value="'+(c?c.emoji||'':'')+'📚" style="font-size:1.4rem"/></div></div>'+
+    '<div class="form-row"><div class="form-group"><label>Color</label><input id="cm-color" type="color" value="'+(c?c.color_hex||'#0891B2':'#0891B2')+'" style="height:42px;padding:4px"/></div>'+
+    '<div class="form-group"><label>Awards Certificate?</label><select id="cm-cert"><option value="true"'+(c&&c.is_certified?' selected':'')+'>Yes</option><option value="false"'+(c&&!c.is_certified?' selected':'')+'>No</option></select></div></div>'+
+    '<div class="form-group"><label>Course Link / URL</label>'+
+      '<input id="cm-url" type="url" value="'+(c&&c.course_url?c.course_url:'')+'" placeholder="https://learn.example.com/hipaa-course"/>'+
+      '<p style="font-size:12px;color:#94A3B8;margin-top:4px">Students will see an Enroll / Join Course button linking to this URL. Leave blank to hide the button.</p>'+
+    '</div>'+
+    '<div id="cm-err" style="color:#DC2626;font-size:13px;margin-top:6px;display:none"></div>';
+  showModal(c?'Edit Course':'Add New Course', body, function(){saveCourse(id);}, id?'Save Changes':'Add Course');
+}
+
+async function saveCourse(id) {
+  var title = $('cm-title') && $('cm-title').value.trim();
+  var err = $('cm-err');
+  if (!title) { if(err){err.style.display='block';err.textContent='Course title is required.';} return; }
+  var data = { title:title, category:$('cm-cat').value, description:$('cm-desc').value,
+    duration_hrs:parseFloat($('cm-hrs').value)||2, lesson_count:parseInt($('cm-lessons').value)||6,
+    price_cents:Math.round((parseFloat($('cm-price').value)||0)*100),
+    emoji:$('cm-emoji').value||'📚', color_hex:$('cm-color').value,
+    is_certified:$('cm-cert').value==='true', is_active:true,
+    course_url: ($('cm-url')&&$('cm-url').value.trim()) || null };
+  var btn=$('modal-save-btn'); if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  try {
+    if (id) { var r=await S.db.from('courses').update(data).eq('id',id); if(r.error) throw r.error; }
+    else { data.sort_order=S.courses.length+1; var r=await S.db.from('courses').insert(data); if(r.error) throw r.error; }
+    S.courses=((await S.db.from('courses').select('*').order('sort_order')).data)||[];
+    closeModal(); render(); toast(id?'Course updated!':'Course added!');
+  } catch(e) { if(err){err.style.display='block';err.textContent=e.message||'Save failed.';} if(btn){btn.disabled=false;btn.textContent=id?'Save Changes':'Add Course';} }
+}
+
+async function adminDeleteCourse(id, title) {
+  if (!confirm('Permanently delete "'+title+'"?')) return;
+  try {
+    var r=await S.db.from('courses').delete().eq('id',id); if(r.error) throw r.error;
+    S.courses=S.courses.filter(function(c){return c.id!==id;}); render(); toast('Course deleted.');
+  } catch(e) { toast(e.message||'Delete failed','error'); }
+}
+
+async function adminToggleCourse(id, val) {
+  val=val==='true'||val===true;
+  try {
+    await S.db.from('courses').update({is_active:val}).eq('id',id);
+    S.courses=S.courses.map(function(c){return c.id===id?Object.assign({},c,{is_active:val}):c;});
+    render(); toast('Course '+(val?'restored':'archived')+'.');
+  } catch(e) { toast(e.message,'error'); }
+}
+
+// COMPLIANCE CRUD
+function openComplianceModal(id) {
+  var r = id ? S.compliance.find(function(x){return x.id===id;}) : null;
+  var body =
+    '<div class="form-group"><label>Requirement Name</label><input id="co-name" value="'+(r?r.name:'')+'" placeholder="e.g. HIPAA Compliance Certificate"/></div>'+
+    '<div class="form-group"><label>Description</label><textarea id="co-desc" style="min-height:70px">'+(r?r.description||'':'')+'</textarea></div>'+
+    '<div class="form-row"><div class="form-group"><label>Document Type</label><select id="co-type">'+
+    ['Vaccination','Academic','Compliance','Identity','Other'].map(function(t){return '<option value="'+t+'"'+(r&&r.document_type===t?' selected':'')+'>'+t+'</option>';}).join('')+
+    '</select></div><div class="form-group"><label>Is Mandatory?</label><select id="co-mand">'+
+    '<option value="true"'+(r&&r.is_mandatory?' selected':'')+'>Yes - Required</option>'+
+    '<option value="false"'+(r&&!r.is_mandatory?' selected':'')+'>No - Recommended</option>'+
+    '</select></div></div><div id="co-err" style="color:#DC2626;font-size:13px;margin-top:6px;display:none"></div>';
+  showModal(r?'Edit Requirement':'Add Compliance Requirement', body, function(){saveCompliance(id);},'Save');
+}
+
+async function saveCompliance(id) {
+  var name=$('co-name')&&$('co-name').value.trim(); var err=$('co-err');
+  if (!name) { if(err){err.style.display='block';err.textContent='Name is required.';} return; }
+  var data={name:name,description:$('co-desc').value,document_type:$('co-type').value,is_mandatory:$('co-mand').value==='true',scope:'global'};
+  var btn=$('modal-save-btn'); if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  try {
+    if (id) { var r=await S.db.from('compliance_requirements').update(data).eq('id',id); if(r.error) throw r.error; }
+    else { var r=await S.db.from('compliance_requirements').insert(data); if(r.error) throw r.error; }
+    S.compliance=((await S.db.from('compliance_requirements').select('*').eq('scope','global')).data)||[];
+    closeModal(); render(); toast(id?'Requirement updated!':'Requirement added!');
+  } catch(e) { if(err){err.style.display='block';err.textContent=e.message||'Save failed.';} if(btn){btn.disabled=false;btn.textContent='Save';} }
+}
+
+async function adminDeleteCompliance(id, name) {
+  if (!confirm('Delete "'+name+'"?')) return;
+  try {
+    var r=await S.db.from('compliance_requirements').delete().eq('id',id); if(r.error) throw r.error;
+    S.compliance=S.compliance.filter(function(c){return c.id!==id;}); render(); toast('Requirement deleted.');
+  } catch(e) { toast(e.message||'Delete failed','error'); }
+}
+
+// ANNOUNCEMENTS CRUD
+function openAnnounceModal(id) {
+  var a = id&&S.announcements ? S.announcements.find(function(x){return x.id===id;}) : null;
+  var body =
+    '<div class="form-group"><label>Title</label><input id="an-title" value="'+(a?a.title:'')+'" placeholder="e.g. System Maintenance on May 20"/></div>'+
+    '<div class="form-group"><label>Message</label><textarea id="an-msg" style="min-height:80px">'+(a?a.message||'':'')+'</textarea></div>'+
+    '<div class="form-row"><div class="form-group"><label>Type</label><select id="an-type">'+
+    [{v:'info',l:'Info'},{v:'warning',l:'Warning'},{v:'success',l:'Good News'}].map(function(t){return '<option value="'+t.v+'"'+(a&&a.type===t.v?' selected':'')+'>'+t.l+'</option>';}).join('')+
+    '</select></div><div class="form-group"><label>Visible to</label><select id="an-audience">'+
+    [{v:'all',l:'Everyone'},{v:'student',l:'Students only'},{v:'doctor',l:'Physicians only'}].map(function(t){return '<option value="'+t.v+'"'+(a&&a.audience===t.v?' selected':'')+'>'+t.l+'</option>';}).join('')+
+    '</select></div></div>'+
+    '<div class="form-group"><label>Status</label><select id="an-active"><option value="true"'+(a&&a.is_active?' selected':'')+'>Live - show now</option><option value="false"'+(a&&!a.is_active?' selected':'')+'>Draft - hidden</option></select></div>'+
+    '<div id="an-err" style="color:#DC2626;font-size:13px;margin-top:6px;display:none"></div>';
+  showModal(a?'Edit Announcement':'New Announcement', body, function(){saveAnnounce(id);},'Publish');
+}
+
+async function saveAnnounce(id) {
+  var title=$('an-title')&&$('an-title').value.trim(); var msg=$('an-msg')&&$('an-msg').value.trim(); var err=$('an-err');
+  if (!title||!msg) { if(err){err.style.display='block';err.textContent='Title and message are required.';} return; }
+  var data={title:title,message:msg,type:$('an-type').value,audience:$('an-audience').value,is_active:$('an-active').value==='true'};
+  var btn=$('modal-save-btn'); if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  try {
+    if (!id) data.created_at=new Date().toISOString();
+    if (id) { await S.db.from('announcements').update(data).eq('id',id); }
+    else { await S.db.from('announcements').insert(data); }
+    S.announcements=((await S.db.from('announcements').select('*').order('created_at',{ascending:false})).data)||[];
+    closeModal(); render(); toast(id?'Announcement updated!':'Announcement published!');
+  } catch(e) {
+    if(err){err.style.display='block';err.textContent=e.message+' — Run the announcements SQL in Supabase if table missing.';}
+    if(btn){btn.disabled=false;btn.textContent='Publish';}
+  }
+}
+
+async function adminDeleteAnnounce(id) {
+  if (!confirm('Delete this announcement?')) return;
+  try { await S.db.from('announcements').delete().eq('id',id); S.announcements=(S.announcements||[]).filter(function(a){return a.id!==id;}); render(); toast('Deleted.'); }
+  catch(e) { toast(e.message,'error'); }
+}
+
+function saveSettings() { toast('Settings saved!'); }
+
+
+
+function contentAdminAddDr() {
+  var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  var specs = ['Cardiology','Orthopedics','Pediatrics','Emergency Medicine','Neurology','Surgery','Internal Medicine','Family Medicine','Radiology','Oncology','Anesthesiology'];
+  return '<div class="section-hdr"><h2 class="section-title">Add Physician Directly</h2></div>' +
+  '<div class="alert alert-info">💡 Admin-created physicians are automatically verified and go live immediately. They can log in with the password you set.</div>' +
+  '<div class="grid2">' +
+  '<div class="card">' +
+    '<h3 style="font-family:serif;margin-bottom:1.25rem">Account & Practice Info</h3>' +
+    '<div class="form-row"><div class="form-group"><label>First Name</label><input id="adr-fn" placeholder="Sarah"/></div>' +
+    '<div class="form-group"><label>Last Name</label><input id="adr-ln" placeholder="Mitchell"/></div></div>' +
+    '<div class="form-group"><label>Email Address</label><input type="email" id="adr-em" placeholder="dr@practice.com"/></div>' +
+    '<div class="form-row"><div class="form-group"><label>Temporary Password</label><input type="password" id="adr-pw" value="MedShadow2026!"/></div>' +
+    '<div class="form-group"><label>Phone</label><input id="adr-ph" placeholder="(704) 555-0100"/></div></div>' +
+    '<div class="form-group"><label>Primary Specialty</label><select id="adr-sp">' +
+      specs.map(function(s){return '<option>'+s+'</option>';}).join('') +
+    '</select></div>' +
+    '<div class="form-group"><label>Practice / Hospital Name</label><input id="adr-pr" placeholder="Charlotte Heart Institute"/></div>' +
+    '<div class="form-row"><div class="form-group"><label>NPI Number</label><input id="adr-npi" placeholder="1234567890"/></div>' +
+    '<div class="form-group"><label>Max Students / Session</label><select id="adr-mx"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select></div></div>' +
+    '<div class="form-group"><label>Practice Address</label><input id="adr-addr" placeholder="123 Medical Dr, Charlotte, NC 28203"/></div>' +
+    '<div class="form-group"><label>Bio / Message to Students</label><textarea id="adr-bio" placeholder="Board-certified physician with experience in..."></textarea></div>' +
+  '</div>' +
+  '<div>' +
+    '<div class="card" style="margin-bottom:1rem">' +
+      '<h3 style="font-family:serif;margin-bottom:1rem">Initial Availability</h3>' +
+      '<p style="font-size:13px;color:#475569;margin-bottom:1rem">Days available for shadowing (8AM-12PM default). Physician can adjust from their dashboard.</p>' +
+      days.map(function(day){
+        return '<label style="display:flex;align-items:center;gap:10px;padding:8px;background:#F8FAFC;border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:14px;font-weight:500">' +
+        '<input type="checkbox" id="adr-day-'+day.toLowerCase()+'" style="width:auto;padding:0">'+day+'</label>';
+      }).join('') +
+    '</div>' +
+    '<div class="card">' +
+      '<h3 style="font-family:serif;margin-bottom:1rem">Student Requirements</h3>' +
+      ['HIPAA Certificate','COVID-19 Vaccination','Influenza Vaccination','Background Check','Drug Screen'].map(function(r,i){
+        return '<label style="display:flex;align-items:center;gap:10px;padding:8px;background:#F8FAFC;border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:14px;font-weight:500">' +
+        '<input type="checkbox" class="adr-req" value="'+r+'" style="width:auto;padding:0"'+(i<2?' checked':'')+'>'+r+'</label>';
+      }).join('') +
+    '</div>' +
+  '</div>' +
+  '</div>' +
+  '<div id="adr-err" style="color:#DC2626;font-size:14px;margin:1rem 0;display:none"></div>' +
+  '<button class="btn btn-primary btn-lg" id="adr-btn" onclick="adminCreateDr()" style="margin-top:1rem">Create & Verify Physician →</button>';
+}
+
+function contentAdminOpps() {
+  var doctors = S.adminDoctors;
+  var allAvail = S.adminAvail || [];
+
+  // Build availability per doctor
+  var availByDoctor = {};
+  allAvail.forEach(function(a){ if(!availByDoctor[a.doctor_id]) availByDoctor[a.doctor_id]=[]; availByDoctor[a.doctor_id].push(a); });
+
+  return '<div class="section-hdr"><h2 class="section-title">Shadowing Opportunities</h2>' +
+    '<div style="display:flex;gap:8px">' +
+      '<button class="btn btn-primary btn-sm" onclick="openOppModal()">+ Add Opportunity</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="refreshAdminOpps()">↻ Refresh</button>' +
+    '</div>' +
+  '</div>' +
+  '<div class="alert alert-info">💡 Each opportunity is a physician + their available time slots. Students browse and enroll in these. Toggle Active/Paused to control visibility.</div>' +
+
+  (doctors.length === 0 ?
+    '<div class="card" style="text-align:center;padding:3rem;color:#475569">' +
+      '<div style="font-size:3rem;margin-bottom:1rem">👨‍⚕️</div>' +
+      '<h3 style="font-family:serif;margin-bottom:.5rem">No physicians added yet</h3>' +
+      '<p style="margin-bottom:1rem">Add a physician first, then set their availability here.</p>' +
+      '<button class="btn btn-primary" onclick="setTab(\'admin-adddr\')">+ Add Physician</button>' +
+    '</div>'
+  :
+  '<div class="grid2">' +
+  doctors.map(function(d) {
+    var name  = (d.profiles && d.profiles.full_name) || 'Dr. Unknown';
+    var email = (d.profiles && d.profiles.email)     || '';
+    var slots = availByDoctor[d.id] || [];
+    var active = slots.filter(function(s){return s.is_active;});
+    return '<div class="card" style="border-left:4px solid '+(d.is_verified?'#059669':d.is_accepting?'#0098B4':'#94A3B8')+'">' +
+      '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">' +
+        '<div class="avatar" style="width:44px;height:44px;font-size:15px;background:#0A2540">'+initials(name)+'</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">' +
+            '<strong style="font-size:15px">'+name+'</strong>' +
+            '<span class="badge badge-'+(d.is_accepting?'green':'gray')+'">'+(d.is_accepting?'Accepting':'Paused')+'</span>' +
+          '</div>' +
+          '<div style="font-size:13px;color:#475569">'+(d.specialty||'No specialty')+'</div>' +
+          '<div style="font-size:12px;color:#94A3B8">'+(d.practice_name||'No practice set')+'</div>' +
+        '</div>' +
+      '</div>' +
+
+      // Availability slots
+      '<div style="margin-bottom:12px">' +
+        '<div style="font-size:12px;font-weight:700;color:#94A3B8;text-transform:uppercase;margin-bottom:6px">'+active.length+' Active Time Slots</div>' +
+        (active.length === 0 ?
+          '<p style="font-size:13px;color:#94A3B8;font-style:italic">No availability set — physician cannot be booked.</p>'
+        :
+          '<div style="display:flex;flex-wrap:wrap;gap:4px">' +
+          active.map(function(s){
+            return '<span style="background:#E0F5FA;color:#007A91;border-radius:4px;padding:3px 8px;font-size:12px;font-weight:600">' +
+              s.day_of_week.slice(0,3)+' '+s.start_time.slice(0,5)+'–'+s.end_time.slice(0,5)+
+            '</span>';
+          }).join('') +
+          '</div>'
+        ) +
+      '</div>' +
+
+      // Actions
+      '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+        '<button class="btn btn-sm btn-outline" onclick="openOppModal(\''+d.id+'\')">✏ Edit Slots</button>' +
+        '<button class="btn btn-sm btn-ghost" onclick="adminToggleDr(\''+d.id+'\','+(d.is_accepting?'false':'true')+')">'+(d.is_accepting?'⏸ Pause':'▶ Activate')+'</button>' +
+        '<button class="btn btn-sm btn-primary" onclick="openScheduleModal(\''+d.id+'\',\''+name+'\')">📅 Schedule Session</button>' +
+      '</div>' +
+    '</div>';
+  }).join('') +
+  '</div>'
+  );
+}
+
+function contentAdminSchedule() {
+  var enrollments = S.adminEnrollments || [];
+  var upcoming = enrollments.filter(function(e){return e.status==='approved'||e.status==='pending';});
+  var completed = enrollments.filter(function(e){return e.status==='completed';});
+
+  return '<div class="section-hdr"><h2 class="section-title">All Shadowing Schedules</h2>' +
+    '<div style="display:flex;gap:8px">' +
+      '<button class="btn btn-primary btn-sm" onclick="openScheduleModal()">+ Schedule Session</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="refreshAdminSchedule()">↻ Refresh</button>' +
+    '</div>' +
+  '</div>' +
+  '<div class="grid3" style="margin-bottom:1.5rem">' +
+    '<div class="stat-card"><div class="stat-val" style="color:#D97706">'+enrollments.filter(function(e){return e.status==='pending';}).length+'</div><div class="stat-lbl">Pending Approval</div></div>' +
+    '<div class="stat-card"><div class="stat-val" style="color:#0098B4">'+upcoming.length+'</div><div class="stat-lbl">Upcoming Sessions</div></div>' +
+    '<div class="stat-card"><div class="stat-val" style="color:#059669">'+completed.length+'</div><div class="stat-lbl">Completed</div></div>' +
+  '</div>' +
+
+  '<div class="card" style="padding:0;overflow:hidden">' +
+  '<table><thead><tr><th>Student</th><th>Physician</th><th>Date & Time</th><th>Status</th><th>Actions</th></tr></thead>' +
+  '<tbody>' +
+  (enrollments.length === 0 ?
+    '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#475569">No sessions scheduled yet. Click + Schedule Session to create one.</td></tr>'
+  :
+    enrollments.map(function(e) {
+      var studentName = e.studentProfile ? e.studentProfile.full_name : 'Unknown Student';
+      var doctorName  = e.doctorProfile  ? e.doctorProfile.full_name  : 'Unknown Physician';
+      var date = e.session_date ? new Date(e.session_date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : '—';
+      var time = (e.start_time||'').slice(0,5) + ' – ' + (e.end_time||'').slice(0,5);
+      var statusColor = {pending:'amber',approved:'teal',completed:'green',cancelled:'red',rejected:'red'};
+      return '<tr>' +
+        '<td><strong>'+studentName+'</strong></td>' +
+        '<td style="font-size:13px">'+doctorName+'</td>' +
+        '<td style="font-size:13px">'+date+'<br><span style="color:#94A3B8">'+time+'</span></td>' +
+        '<td><span class="badge badge-'+(statusColor[e.status]||'gray')+'">'+e.status+'</span></td>' +
+        '<td><div style="display:flex;gap:4px">' +
+          (e.status==='pending'?
+            '<button class="btn btn-sm btn-success" onclick="adminApproveEnrollment(\''+e.id+'\')">Approve</button>' +
+            '<button class="btn btn-sm btn-danger" onclick="adminRejectEnrollment(\''+e.id+'\')">Reject</button>'
+          :'') +
+          (e.status==='approved'?
+            '<button class="btn btn-sm btn-ghost" onclick="adminCompleteEnrollment(\''+e.id+'\')">Mark Done</button>':''
+          ) +
+          '<button class="btn btn-sm btn-ghost" onclick="adminDeleteEnrollment(\''+e.id+'\')">🗑</button>' +
+        '</div></td>' +
+      '</tr>';
+    }).join('')
+  ) +
+  '</tbody></table></div>';
+}
+
+// Open modal to add/edit physician availability slots
+function openOppModal(doctorId) {
+  var doc = doctorId ? S.adminDoctors.find(function(d){return d.id===doctorId;}) : null;
+  var allAvail = S.adminAvail || [];
+  var slots = doctorId ? allAvail.filter(function(a){return a.doctor_id===doctorId;}) : [];
+
+  // If no doctorId, let admin pick a doctor
+  var docSelect = doctorId ? '' :
+    '<div class="form-group"><label>Select Physician</label><select id="opp-dr-id">' +
+    S.adminDoctors.map(function(d){return '<option value="'+d.id+'">'+(d.profiles&&d.profiles.full_name||d.id)+'</option>';}).join('') +
+    '</select></div>';
+
+  var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  var slots12 = ['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
+
+  var body = docSelect +
+    '<div style="font-size:13px;font-weight:600;color:#475569;margin-bottom:8px">Select available time slots (click to toggle):</div>' +
+    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">' +
+    '<thead><tr><th style="padding:6px;text-align:left;color:#94A3B8">Time</th>' +
+    days.map(function(d){return '<th style="padding:6px;text-align:center;color:#94A3B8">'+d.slice(0,3)+'</th>';}).join('') +
+    '</tr></thead><tbody>' +
+    slots12.map(function(slot){
+      return '<tr><td style="padding:4px 6px;font-size:11px;font-weight:600;color:#475569;white-space:nowrap">'+slot+'</td>' +
+      days.map(function(day){
+        var isOn = slots.some(function(s){return s.day_of_week===day&&s.start_time&&s.start_time.slice(0,5)===slot&&s.is_active;});
+        return '<td style="text-align:center;padding:3px">' +
+          '<button class="avail-slot-btn" data-day="'+day+'" data-time="'+slot+'" onclick="toggleOppSlot(this)" style="width:40px;height:26px;border-radius:5px;border:none;cursor:pointer;font-size:10px;font-weight:700;background:'+(isOn?'#0098B4':'#E2E8F0')+';color:'+(isOn?'#fff':'#94A3B8')+'">' +
+            (isOn?'ON':'–') +
+          '</button>' +
+        '</td>';
+      }).join('') + '</tr>';
+    }).join('') +
+    '</tbody></table></div>' +
+    '<div id="opp-err" style="color:#DC2626;font-size:13px;margin-top:8px;display:none"></div>';
+
+  showModal(
+    doc ? 'Edit Availability — '+(doc.profiles&&doc.profiles.full_name||'Physician') : 'Add Opportunity',
+    body,
+    function(){ saveOppSlots(doctorId); },
+    'Save Availability'
+  );
+}
+
+function toggleOppSlot(btn) {
+  var on = btn.textContent.trim() === 'ON';
+  btn.style.background = on ? '#E2E8F0' : '#0098B4';
+  btn.style.color = on ? '#94A3B8' : '#fff';
+  btn.textContent = on ? '–' : 'ON';
+}
+
+async function saveOppSlots(doctorId) {
+  var id = doctorId || ($('opp-dr-id') && $('opp-dr-id').value);
+  if (!id) { toast('Please select a physician','error'); return; }
+
+  var btn = $('modal-save-btn');
+  if(btn){btn.disabled=true;btn.textContent='Saving...';}
+
+  var slots = [];
+  document.querySelectorAll('.avail-slot-btn').forEach(function(b){
+    if (b.textContent.trim() === 'ON') {
+      var t = b.dataset.time;
+      var eh = String(parseInt(t)+1).padStart(2,'0');
+      slots.push({ doctor_id:id, day_of_week:b.dataset.day, start_time:t+':00', end_time:eh+':00:00', is_active:true });
+    }
+  });
+
+  try {
+    await S.db.from('doctor_availability').delete().eq('doctor_id', id);
+    if (slots.length > 0) {
+      var r = await S.db.from('doctor_availability').insert(slots);
+      if (r.error) throw r.error;
+    }
+    await refreshAdminOpps();
+    closeModal();
+    toast('Availability saved! '+slots.length+' slots active.');
+  } catch(e) {
+    var err = $('opp-err');
+    if(err){err.style.display='block';err.textContent=e.message||'Save failed.';}
+    if(btn){btn.disabled=false;btn.textContent='Save Availability';}
+  }
+}
+
+async function refreshAdminOpps() {
+  try {
+    var avail = (await S.db.from('doctor_availability').select('*')).data || [];
+    S.adminAvail = avail;
+    render();
+  } catch(e) { toast(e.message,'error'); }
+}
+
+// Schedule a session directly
+function openScheduleModal(doctorId, doctorName) {
+  var students = S.adminStudents.filter(function(s){return s.verification_status==='verified';});
+  var body =
+    '<div class="form-group"><label>Student *</label><select id="sch-student">' +
+    (students.length===0?'<option value="">No verified students yet</option>':
+      students.map(function(s){var n=(s.profiles&&s.profiles.full_name)||s.id; return '<option value="'+s.id+'">'+n+'</option>';}).join('')) +
+    '</select></div>' +
+    '<div class="form-group"><label>Physician *</label><select id="sch-doctor">' +
+    S.adminDoctors.map(function(d){var n=(d.profiles&&d.profiles.full_name)||d.id; return '<option value="'+d.id+'"'+(d.id===doctorId?' selected':'')+'>'+n+'</option>';}).join('') +
+    '</select></div>' +
+    '<div class="form-row">' +
+      '<div class="form-group"><label>Session Date *</label><input type="date" id="sch-date" value="'+new Date(Date.now()+7*86400000).toISOString().split('T')[0]+'"/></div>' +
+      '<div class="form-group"><label>Start Time</label><select id="sch-start"><option value="07:00">7:00 AM</option><option value="08:00" selected>8:00 AM</option><option value="09:00">9:00 AM</option><option value="13:00">1:00 PM</option><option value="14:00">2:00 PM</option></select></div>' +
+    '</div>' +
+    '<div class="form-row">' +
+      '<div class="form-group"><label>End Time</label><select id="sch-end"><option value="11:00">11:00 AM</option><option value="12:00" selected>12:00 PM</option><option value="13:00">1:00 PM</option><option value="17:00">5:00 PM</option></select></div>' +
+      '<div class="form-group"><label>Status</label><select id="sch-status"><option value="approved">Approved</option><option value="pending">Pending Physician Approval</option></select></div>' +
+    '</div>' +
+    '<div class="form-group"><label>Notes (optional)</label><textarea id="sch-notes" placeholder="Any special instructions..."></textarea></div>' +
+    '<div id="sch-err" style="color:#DC2626;font-size:13px;margin-top:6px;display:none"></div>';
+
+  showModal('Schedule Shadowing Session', body, saveScheduleSession, 'Schedule Session');
+}
+
+async function saveScheduleSession() {
+  var studentId = $('sch-student') && $('sch-student').value;
+  var doctorId  = $('sch-doctor')  && $('sch-doctor').value;
+  var date      = $('sch-date')    && $('sch-date').value;
+  var err = $('sch-err');
+  var btn = $('modal-save-btn');
+
+  if (!studentId||!doctorId||!date) {
+    if(err){err.style.display='block';err.textContent='Please fill all required fields.';}
+    return;
+  }
+  if(btn){btn.disabled=true;btn.textContent='Scheduling...';}
+
+  try {
+    var r = await S.db.from('shadowing_enrollments').insert({
+      student_id:  studentId,
+      doctor_id:   doctorId,
+      session_date: date,
+      start_time:  ($('sch-start').value||'08:00')+':00',
+      end_time:    ($('sch-end').value||'12:00')+':00',
+      status:      $('sch-status').value,
+      doctor_notes: $('sch-notes').value || null
+    });
+    if (r.error) throw r.error;
+    await refreshAdminSchedule();
+    closeModal();
+    toast('Session scheduled successfully!');
+  } catch(e) {
+    if(err){err.style.display='block';err.textContent=e.message||'Schedule failed.';}
+    if(btn){btn.disabled=false;btn.textContent='Schedule Session';}
+  }
+}
+
+async function refreshAdminSchedule() {
+  try {
+    var enr = (await S.db.from('shadowing_enrollments').select('*').order('session_date',{ascending:false})).data || [];
+    var profs = (await S.db.from('profiles').select('id,full_name')).data || [];
+    var pm = {}; profs.forEach(function(p){pm[p.id]=p;});
+    S.adminEnrollments = enr.map(function(e){
+      return Object.assign({},e,{ studentProfile: pm[e.student_id]||{}, doctorProfile: pm[e.doctor_id]||{} });
+    });
+    render();
+  } catch(e) { toast(e.message,'error'); }
+}
+
+async function adminApproveEnrollment(id) {
+  try {
+    await S.db.from('shadowing_enrollments').update({status:'approved'}).eq('id',id);
+    S.adminEnrollments=(S.adminEnrollments||[]).map(function(e){return e.id===id?Object.assign({},e,{status:'approved'}):e;});
+    render(); toast('Session approved!');
+  } catch(e){ toast(e.message,'error'); }
+}
+
+async function adminRejectEnrollment(id) {
+  try {
+    await S.db.from('shadowing_enrollments').update({status:'rejected'}).eq('id',id);
+    S.adminEnrollments=(S.adminEnrollments||[]).map(function(e){return e.id===id?Object.assign({},e,{status:'rejected'}):e;});
+    render(); toast('Session rejected.');
+  } catch(e){ toast(e.message,'error'); }
+}
+
+async function adminCompleteEnrollment(id) {
+  try {
+    await S.db.from('shadowing_enrollments').update({status:'completed',hours_logged:4}).eq('id',id);
+    S.adminEnrollments=(S.adminEnrollments||[]).map(function(e){return e.id===id?Object.assign({},e,{status:'completed'}):e;});
+    render(); toast('Session marked as completed!');
+  } catch(e){ toast(e.message,'error'); }
+}
+
+async function adminDeleteEnrollment(id) {
+  if (!confirm('Delete this session?')) return;
+  try {
+    await S.db.from('shadowing_enrollments').delete().eq('id',id);
+    S.adminEnrollments=(S.adminEnrollments||[]).filter(function(e){return e.id!==id;});
+    render(); toast('Session deleted.');
+  } catch(e){ toast(e.message,'error'); }
+}
+
+
+async function adminCreateDr() {
+  var btn=$('adr-btn'); if(btn){btn.disabled=true;btn.textContent='Creating...';}
+  var fn=$('adr-fn')&&$('adr-fn').value.trim(), ln=$('adr-ln')&&$('adr-ln').value.trim();
+  var em=$('adr-em')&&$('adr-em').value.trim(), pw=$('adr-pw')&&$('adr-pw').value;
+  if (!fn||!ln||!em||!pw) { toast('Please fill all required fields','error'); if(btn){btn.disabled=false;btn.textContent='Create & Verify Physician';} return; }
+  try {
+    // Step 1: Create auth account
+    var sRes = await S.db.auth.signUp({
+      email: em, password: pw,
+      options: { data: { full_name: 'Dr. '+fn+' '+ln, role: 'doctor' } }
+    });
+    if (sRes.error) {
+      if (sRes.error.message.toLowerCase().includes('already')) throw new Error('An account with this email already exists.');
+      throw sRes.error;
+    }
+    var uid = sRes.data.user.id;
+
+    // Step 2: Create doctor record
+    var spec = $('adr-sp')&&$('adr-sp').value;
+    var prac = $('adr-pr')&&$('adr-pr').value;
+    var npi  = $('adr-npi')&&$('adr-npi').value;
+    var addr = $('adr-addr')&&$('adr-addr').value;
+    var bio  = $('adr-bio')&&$('adr-bio').value;
+    var mx   = parseInt($('adr-mx')&&$('adr-mx').value)||2;
+
+    var dRes = await S.db.from('doctors').insert({
+      id: uid, specialty: spec, practice_name: prac,
+      npi_number: npi, practice_address: addr, bio: bio,
+      max_students: mx, is_verified: true, is_accepting: true,
+      verification_status: 'verified'
+    });
+    if (dRes.error) throw dRes.error;
+
+    // Step 3: Make sure profile has doctor role
+    await S.db.from('profiles').update({ role: 'doctor', phone: $('adr-ph')&&$('adr-ph').value }).eq('id', uid);
+
+    // Step 4: Reload all doctors + profiles separately and merge
+    var allProfiles = (await S.db.from('profiles').select('*')).data || [];
+    var allDoctors  = (await S.db.from('doctors').select('*').order('created_at',{ascending:false})).data || [];
+    var pm = {}; allProfiles.forEach(function(p){ pm[p.id]=p; });
+    S.adminDoctors = allDoctors.map(function(d){ return Object.assign({},d,{profiles:pm[d.id]||{}}); });
+
+    // Step 5: Add default availability if days were selected
+    var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    var selectedDays = days.filter(function(d){ var cb=$('adr-day-'+d.toLowerCase()); return cb&&cb.checked; });
+    if (selectedDays.length > 0) {
+      var slots = selectedDays.map(function(day){ return { doctor_id:uid, day_of_week:day, start_time:'08:00:00', end_time:'12:00:00', is_active:true }; });
+      await S.db.from('doctor_availability').insert(slots);
+    }
+
+    setTab('admin-doctors');
+    toast('Dr. '+fn+' '+ln+' created, verified, and ready!');
+  } catch(e) {
+    toast(e.message||'Failed to create physician','error');
+    if(btn){btn.disabled=false;btn.textContent='Create & Verify Physician';}
+  }
+}
+
+function exportCsv() {
+  var rows=[['Name','Email','Status','Fee Paid','Joined']].concat(S.adminStudents.map(function(s){return[s.profiles&&s.profiles.full_name||'',s.profiles&&s.profiles.email||'',s.verification_status,s.reg_fee_paid?'Yes':'No',new Date(s.profiles&&s.profiles.created_at||Date.now()).toLocaleDateString()];}));
+  var csv=rows.map(function(r){return r.join(',');}).join('\n');
+  var a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='medshadow_students.csv'; a.click();
+}
+
+// ─────────────────────────────────────────────
+// INIT — load Supabase dynamically, never block
+// ─────────────────────────────────────────────
+function loadScript(src,cb){var s=document.createElement('script');s.src=src;s.async=true;s.onload=cb;s.onerror=function(){console.warn('Failed to load: '+src);if(cb)cb();};document.head.appendChild(s);}
+
+function startApp() {
+  // Show landing immediately
+  render();
+
+  // Load Supabase
+  loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', function() {
+    try {
+      S.db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: false
+        }
+      });
+
+      // Test connection and show status
+      (async function testConn() {
+        var bar = document.getElementById('conn-status');
+        try {
+          var t = await Promise.race([
+            S.db.from('profiles').select('id').limit(1),
+            new Promise(function(_,reject){ setTimeout(function(){ reject(new Error('timeout')); }, 8000); })
+          ]);
+          if (t.error) throw t.error;
+          if (bar) { bar.style.background='#059669'; bar.textContent='✓ Connected to MedShadow server'; setTimeout(function(){ bar.style.display='none'; }, 3000); }
+        } catch(e) {
+          if (bar) {
+            bar.style.background='#DC2626';
+            if (e.message === 'timeout') {
+              bar.textContent='⚠ Server connection timed out — Supabase project may be paused. Go to supabase.com and restore your project.';
+            } else if (e.message && e.message.includes('Failed to fetch')) {
+              bar.textContent='⚠ Failed to reach database — Check supabase.com: your project may be paused or the URL is wrong.';
+            } else {
+              bar.textContent='⚠ Connection error: ' + (e.message || 'Unknown error') + ' — Check Supabase dashboard.';
+            }
+          }
+        }
+      })();
+      // Check for existing session
+      S.db.auth.getSession().then(function(res) {
+        var session = res && res.data && res.data.session;
+        if (session && session.user) {
+          S.db.from('profiles').select('*').eq('id',session.user.id).single().then(function(pRes) {
+            if (pRes.data) {
+              S.user=session.user; S.profile=pRes.data; S.role=pRes.data.role;
+              var tabs={student:'opportunities',doctor:'dr-overview',admin:'admin-overview'};
+              S.tab=tabs[S.role]||'opportunities';
+              loadDashData().then(function(){ showPage(S.role); });
+            }
+          });
+        }
+      }).catch(function(){});
+      // Auth state listener
+      S.db.auth.onAuthStateChange(function(event) {
+        if (event==='SIGNED_OUT'){S.user=null;S.profile=null;S.role=null;showPage('landing');}
+      });
+    } catch(e) { console.warn('Supabase init error:',e); }
+  });
+}
+
+// Start immediately when DOM is ready
+if (document.readyState==='loading') {
+  document.addEventListener('DOMContentLoaded', startApp);
+} else {
+  startApp();
+}
+</script>
+</body>
+</html>
