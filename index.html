@@ -896,7 +896,7 @@ function oppCard(d) {
     </div>\
     <div class="opp-footer">\
       <div style="font-size:12px;color:#94A3B8">Requires: '+(d.requirements&&d.requirements.length?d.requirements.slice(0,2).join(', '):'HIPAA Certificate')+'</div>\
-      <button class="btn btn-primary btn-sm" onclick="enrollDoc(\''+d.id+'\',\''+name+'\')">Enroll Now</button>\
+      <button class="btn btn-primary btn-sm" onclick="openEnrollModal(\''+d.id+'\')">Enroll Now</button>\
     </div>\
   </div>';
 }
@@ -1625,7 +1625,7 @@ async function loadDashData() {
   try {
     if (S.role==='student') {
       var [dr,cr,cm,docs,enr] = await Promise.allSettled([
-        S.db.from('doctors').select('*,profiles:profiles!doctors_id_fkey(full_name,email),doctor_availability!doctor_availability_doctor_id_fkey(start_date,end_date,start_time,end_time,is_active)').eq('is_verified',true).eq('is_accepting',true).order('rating',{ascending:false}),
+        S.db.from('doctors').select('*,profiles:profiles!doctors_id_fkey(full_name,email),doctor_availability!doctor_availability_doctor_id_fkey(id,start_date,end_date,start_time,end_time,is_active)').eq('is_verified',true).eq('is_accepting',true).order('rating',{ascending:false}),
         S.db.from('courses').select('*').eq('is_active',true).order('sort_order'),
         S.db.from('compliance_requirements').select('*').eq('scope','global'),
         S.db.from('student_documents').select('*').eq('student_id',S.user.id).order('created_at',{ascending:false}),
@@ -1713,14 +1713,57 @@ async function doSignOut() {
   showPage('landing'); toast('Signed out successfully.');
 }
 
-async function enrollDoc(doctorId, name) {
-  if (!S.db) { toast('Not connected','error'); return; }
+function openEnrollModal(doctorId) {
+  var d = (S.doctors||[]).find(function(x){ return x.id===doctorId; });
+  if (!d) { toast('Physician not found','error'); return; }
+  var name = d.profiles&&d.profiles.full_name ? d.profiles.full_name : 'Physician';
+  var today = new Date().toISOString().split('T')[0];
+  var rows = sortWindows((d.doctor_availability||[]).filter(function(a){ return a.is_active && a.start_date && a.start_date>=today; }));
+
+  var body = rows.length===0 ?
+    '<p style="color:#475569">This physician has no upcoming availability right now. Check back soon.</p>'
+  :
+    '<p style="font-size:13px;color:#475569;margin-bottom:10px">Pick the day you\'d like to shadow '+name+':</p>' +
+    '<div style="display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto">' +
+    rows.map(function(w,i){
+      var lbl = windowLabel(w);
+      return '<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid #E2E8F0;border-radius:8px;cursor:pointer">' +
+        '<input type="radio" name="enroll-slot" value="'+w.id+'" style="width:auto"'+(i===0?' checked':'')+'/>' +
+        '<span style="font-weight:600">'+lbl.dateLabel+'</span><span style="color:#475569">'+lbl.timeLabel+'</span>' +
+      '</label>';
+    }).join('') +
+    '</div>' +
+    '<div id="enroll-err" style="color:#DC2626;font-size:13px;margin-top:10px;display:none"></div>';
+
+  showModal(
+    'Enroll with '+name,
+    body,
+    rows.length===0 ? function(){ closeModal(); } : function(){ confirmEnroll(doctorId, name); },
+    rows.length===0 ? 'Close' : 'Request Enrollment'
+  );
+}
+
+async function confirmEnroll(doctorId, name) {
+  var d = (S.doctors||[]).find(function(x){ return x.id===doctorId; });
+  var rows = d ? (d.doctor_availability||[]) : [];
+  var picked = document.querySelector('input[name="enroll-slot"]:checked');
+  var errEl = $('enroll-err');
+  function showErr(msg){ if(errEl){errEl.style.display='block';errEl.textContent=msg;} }
+  if (!picked) { showErr('Please pick a date.'); return; }
+  var w = rows.find(function(r){ return String(r.id)===picked.value; });
+  if (!w) { showErr('That date is no longer available — please pick another.'); return; }
+
+  var btn = $('modal-save-btn'); if(btn){btn.disabled=true;btn.textContent='Requesting...';}
   try {
-    var d=new Date(); d.setDate(d.getDate()+(8-d.getDay())%7||7);
-    await S.db.from('shadowing_enrollments').insert({student_id:S.user.id,doctor_id:doctorId,session_date:d.toISOString().split('T')[0],start_time:'08:00',end_time:'12:00',status:'pending'});
+    var r = await S.db.from('shadowing_enrollments').insert({student_id:S.user.id,doctor_id:doctorId,session_date:w.start_date,start_time:w.start_time,end_time:w.end_time,status:'pending'});
+    if (r.error) throw r.error;
     S.enrollments = (await S.db.from('shadowing_enrollments').select('*,doctors:doctor_id(specialty,practice_name,profiles:profiles!doctors_id_fkey(full_name))').eq('student_id',S.user.id).order('session_date',{ascending:false})).data || [];
-    toast('Enrollment request sent to '+name+'! Awaiting approval.');
-  } catch(e) { toast(e.message||'Enrollment failed','error'); }
+    closeModal();
+    toast('Enrollment request sent to '+name+' for '+fmtDate(w.start_date)+'! Awaiting approval.');
+  } catch(e) {
+    showErr(e.message||'Enrollment failed.');
+    if(btn){btn.disabled=false;btn.textContent='Request Enrollment';}
+  }
 }
 
 async function cancelEnr(id) {
