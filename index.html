@@ -53,6 +53,12 @@ label{display:block;font-size:13px;font-weight:600;color:#475569;margin-bottom:5
 .nav-link:hover{color:#fff;background:rgba(255,255,255,.08)}
 .nav-user{display:flex;align-items:center;gap:10px}
 .avatar{width:36px;height:36px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;cursor:pointer;flex-shrink:0}
+.nav-menu-wrap{position:relative}
+.nav-dropdown{position:absolute;top:calc(100% + 10px);right:0;background:#fff;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.18);min-width:170px;padding:6px;z-index:150;display:none}
+.nav-dropdown.open{display:block}
+.nav-dropdown-item{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:6px;font-size:14px;font-weight:600;color:#1E293B;cursor:pointer;white-space:nowrap}
+.nav-dropdown-item:hover{background:#F8FAFC}
+.nav-dropdown-item.danger{color:#DC2626}
 .sidebar{width:230px;background:var(--navy);padding:1.5rem 0;flex-shrink:0;min-height:calc(100vh - 64px)}
 .sidebar-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.08em;padding:0 1.75rem;margin-bottom:.5rem}
 .sidebar-item{display:flex;align-items:center;gap:10px;padding:9px 1rem;border-radius:8px;margin:0 .75rem 2px;color:rgba(255,255,255,.65);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s}
@@ -360,10 +366,27 @@ function updateNav() {
   var nav = document.querySelector('.nav .nav-actions');
   if (!nav) return;
   if (S.user && S.profile) {
-    nav.innerHTML = '<div class="nav-user"><span style="color:rgba(255,255,255,.6);font-size:13px">'+S.profile.full_name.split(' ')[0]+'</span><div class="avatar" onclick="doSignOut()" title="Sign out">'+initials(S.profile.full_name)+'</div></div>';
+    nav.innerHTML = '<div class="nav-user"><span style="color:rgba(255,255,255,.6);font-size:13px">'+S.profile.full_name.split(' ')[0]+'</span>' +
+      '<div class="nav-menu-wrap">' +
+        '<div class="avatar" onclick="toggleNavMenu(event)" title="Account menu">'+initials(S.profile.full_name)+'</div>' +
+        '<div class="nav-dropdown" id="nav-dropdown">' +
+          '<div class="nav-dropdown-item danger" onclick="doSignOut()">✕ Sign Out</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
   } else {
     nav.innerHTML = '<button class="btn btn-ghost btn-sm" style="color:#fff;border-color:rgba(255,255,255,.4)" onclick="showPage(\'login\')">Sign In</button><button class="btn btn-primary btn-sm" onclick="showPage(\'register\')">Get Started</button>';
   }
+}
+
+function toggleNavMenu(e) {
+  if (e) e.stopPropagation();
+  var dd = $('nav-dropdown');
+  if (dd) dd.classList.toggle('open');
+}
+function closeNavMenu() {
+  var dd = $('nav-dropdown');
+  if (dd) dd.classList.remove('open');
 }
 
 // ─────────────────────────────────────────────
@@ -1893,6 +1916,7 @@ function closeModal() {
 function modalSave() { if (_modalSaveFn) _modalSaveFn(); }
 document.addEventListener('click', function(e) {
   if (e.target && e.target.id === 'modal-overlay') { closeModal(); return; }
+  if (!e.target.closest('.nav-menu-wrap')) closeNavMenu();
 
   var btn = e.target.closest('[data-action]');
   if (!btn) return;
