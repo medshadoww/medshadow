@@ -292,6 +292,50 @@ function initials(name) {
 }
 
 // ─────────────────────────────────────────────
+// AVAILABILITY (date-range + start/end time)
+// Single source of truth: rows in the `doctor_availability` table, each
+// { id, doctor_id, start_date, end_date, start_time, end_time, is_active }.
+// The physician's own editor, the student opportunity listing, and the admin
+// panel all format from these same rows, so changes made in one place are
+// reflected everywhere else the next time data is (re)loaded.
+// ─────────────────────────────────────────────
+var MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  var p = iso.split('-'); var y = parseInt(p[0],10), m = parseInt(p[1],10), d = parseInt(p[2],10);
+  return MONTH_ABBR[m-1]+' '+d;
+}
+
+function fmtTime12(t) {
+  if (!t) return '';
+  var parts = t.split(':'); var h = parseInt(parts[0],10), m = parseInt(parts[1],10);
+  var period = h >= 12 ? 'PM' : 'AM';
+  var hh = h % 12; if (hh === 0) hh = 12;
+  return hh+':'+String(m).padStart(2,'0')+' '+period;
+}
+
+function windowLabel(w) {
+  var dateLabel = (!w.end_date || w.end_date===w.start_date) ? fmtDate(w.start_date) : fmtDate(w.start_date)+' – '+fmtDate(w.end_date);
+  var timeLabel = fmtTime12(w.start_time)+' – '+fmtTime12(w.end_time);
+  return { dateLabel: dateLabel, timeLabel: timeLabel };
+}
+
+function sortWindows(rows) {
+  return (rows||[]).slice().sort(function(a,b){
+    return (a.start_date||'').localeCompare(b.start_date||'') || (a.start_time||'').localeCompare(b.start_time||'');
+  });
+}
+
+// Compact display tags for the student listing / admin panel, e.g. "Jul 13, 8:00 AM – 12:00 PM"
+function formatAvailTags(rows) {
+  return sortWindows((rows||[]).filter(function(a){ return a.is_active && a.start_date; })).map(function(w){
+    var lbl = windowLabel(w);
+    return lbl.dateLabel+', '+lbl.timeLabel;
+  });
+}
+
+// ─────────────────────────────────────────────
 // RENDER ROUTER
 // ─────────────────────────────────────────────
 function render() {
@@ -813,7 +857,7 @@ function contentOpportunities() {
 }
 function oppCard(d) {
   var name = d.profiles&&d.profiles.full_name ? d.profiles.full_name : 'Physician';
-  var avail = d.doctor_availability ? d.doctor_availability.filter(function(a){return a.is_active;}).slice(0,3).map(function(a){return a.day_of_week.slice(0,3)+' '+a.start_time.slice(0,5);}) : [];
+  var avail = d.doctor_availability ? formatAvailTags(d.doctor_availability).slice(0,3) : [];
   return '<div class="opp-card">\
     <div style="display:flex;gap:12px">\
       <div style="width:50px;height:50px;border-radius:12px;background:#E0F5FA;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0">🩺</div>\
@@ -964,17 +1008,82 @@ function contentDrProfile() {
 }
 
 function contentDrAvail() {
-  var days=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-  var slots=['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
-  var avail=S.doctorAvail||[];
-  function isOn(day,time){return avail.some(function(a){return a.day_of_week===day&&a.start_time&&a.start_time.slice(0,5)===time&&a.is_active;});}
-  return '<div class="section-hdr"><h2 class="section-title">Availability</h2><button class="btn btn-primary btn-sm" onclick="saveAvail()">✓ Save Schedule</button></div>\
-  <div class="alert alert-info">💡 Students can only book during your active (ON) time slots. Click any slot to toggle.</div>\
-  <div class="card" style="overflow-x:auto"><table style="min-width:600px" id="avail-table">\
-    <thead><tr><th>Time</th>'+days.map(function(d){return'<th style="text-align:center">'+d.slice(0,3)+'</th>';}).join('')+'</tr></thead>\
-    <tbody>'+slots.map(function(slot){return'<tr><td style="font-size:13px;font-weight:600;color:#475569;white-space:nowrap">'+slot+'</td>'+days.map(function(day){var on=isOn(day,slot);return'<td style="text-align:center;padding:6px"><button class="avail-btn" data-day="'+day+'" data-time="'+slot+'" onclick="toggleSlot(this)" style="width:44px;height:30px;border-radius:6px;border:none;cursor:pointer;font-size:11px;font-weight:700;background:'+(on?'#0098B4':'#E2E8F0')+';color:'+(on?'#fff':'#94A3B8')+'">'+(on?'ON':'–')+'</button></td>';}).join('')+'</tr>';}).join('')+'</tbody></table></div>';
+  var rows = sortWindows(S.doctorAvail);
+  return '<div class="section-hdr"><h2 class="section-title">Availability</h2><span class="badge badge-teal">✓ Synced live</span></div>' +
+  '<div class="alert alert-info">💡 One shadowing opportunity per day — pick a date and the hours you\'re open that day. Picking a date you\'ve already set will update its time instead of adding a duplicate.</div>' +
+  '<div class="card" style="margin-bottom:1.5rem">' +
+    '<h3 style="font-family:serif;margin-bottom:1rem" id="da-form-title">Add a Day</h3>' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-items:end">' +
+      '<div class="form-group"><label>Date</label><input type="date" id="da-date"/></div>' +
+      '<div class="form-group"><label>Start Time</label><input type="time" id="da-start-time"/></div>' +
+      '<div class="form-group"><label>End Time</label><input type="time" id="da-end-time"/></div>' +
+      '<button class="btn btn-primary" id="da-add-btn" style="height:42px" onclick="addAvailWindow()">+ Save Day</button>' +
+    '</div>' +
+    '<div id="da-err" style="color:#DC2626;font-size:13px;margin-top:8px;display:none"></div>' +
+  '</div>' +
+  '<div class="card" style="padding:0;overflow:hidden"><table><thead><tr><th>Date</th><th>Time</th><th></th></tr></thead><tbody>' +
+  (rows.length===0 ?
+    '<tr><td colspan="3" style="text-align:center;padding:2rem;color:#475569">No days set yet — add one above.</td></tr>'
+  :
+    rows.map(function(w){
+      var lbl = windowLabel(w);
+      return '<tr><td style="font-weight:600">'+lbl.dateLabel+'</td><td style="color:#475569">'+lbl.timeLabel+'</td>' +
+        '<td style="text-align:right"><button class="btn btn-sm btn-ghost" onclick="editAvailWindow(\''+w.id+'\')">✎ Edit</button> ' +
+        '<button class="btn btn-sm btn-ghost" onclick="removeAvailWindow(\''+w.id+'\')">✕ Remove</button></td></tr>';
+    }).join('')
+  ) +
+  '</tbody></table></div>';
 }
-function toggleSlot(btn){var on=btn.textContent.trim()==='ON';btn.style.background=on?'#E2E8F0':'#0098B4';btn.style.color=on?'#94A3B8':'#fff';btn.textContent=on?'–':'ON';}
+
+function editAvailWindow(id) {
+  var w = (S.doctorAvail||[]).find(function(x){ return String(x.id)===String(id); });
+  if (!w) return;
+  if ($('da-date')) $('da-date').value = w.start_date;
+  if ($('da-start-time')) $('da-start-time').value = (w.start_time||'').slice(0,5);
+  if ($('da-end-time')) $('da-end-time').value = (w.end_time||'').slice(0,5);
+  var title = $('da-form-title'); if (title) title.textContent = 'Edit ' + fmtDate(w.start_date);
+}
+
+async function addAvailWindow() {
+  var errEl = $('da-err');
+  function showErr(msg){ if(errEl){errEl.style.display='block';errEl.textContent=msg;} }
+  if (errEl) errEl.style.display='none';
+  var sd = $('da-date') && $('da-date').value;
+  var st = $('da-start-time') && $('da-start-time').value;
+  var et = $('da-end-time') && $('da-end-time').value;
+  if (!sd || !st || !et) { showErr('Please pick a date, start time, and end time.'); return; }
+  if (et <= st) { showErr('End time must be after start time.'); return; }
+  var btn = $('da-add-btn'); if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  try {
+    // A physician hosts one opportunity per day — if this date is already set, update it instead of duplicating.
+    var existing = (S.doctorAvail||[]).find(function(w){ return w.start_date===sd; });
+    if (existing) {
+      var ru = await S.db.from('doctor_availability').update({ start_time:st+':00', end_time:et+':00', end_date:sd, is_active:true }).eq('id', existing.id).select();
+      if (ru.error) throw ru.error;
+      S.doctorAvail = (S.doctorAvail||[]).map(function(w){ return w.id===existing.id ? Object.assign({}, w, {start_time:st+':00', end_time:et+':00', end_date:sd, is_active:true}) : w; });
+      toast('Updated '+fmtDate(sd)+' — synced to your public listing & admin view!');
+    } else {
+      var row = { doctor_id:S.user.id, start_date:sd, end_date:sd, start_time:st+':00', end_time:et+':00', is_active:true };
+      var r = await S.db.from('doctor_availability').insert(row).select();
+      if (r.error) throw r.error;
+      S.doctorAvail = (S.doctorAvail||[]).concat((r.data&&r.data.length)?r.data:[row]);
+      toast('Added '+fmtDate(sd)+' — synced to your public listing & admin view!');
+    }
+    render();
+  } catch(e) {
+    showErr(e.message||'Failed to save.');
+    if(btn){btn.disabled=false;btn.textContent='+ Save Day';}
+  }
+}
+
+async function removeAvailWindow(id) {
+  try {
+    await S.db.from('doctor_availability').delete().eq('id', id);
+    S.doctorAvail = (S.doctorAvail||[]).filter(function(w){ return String(w.id)!==String(id); });
+    render();
+    toast('Day removed');
+  } catch(e) { toast(e.message||'Failed to remove day','error'); }
+}
 
 function contentDrStudents() {
   return '<div class="section-hdr"><h2 class="section-title">Student Requests</h2></div>\
@@ -1493,7 +1602,7 @@ async function loadDashData() {
   try {
     if (S.role==='student') {
       var [dr,cr,cm,docs,enr] = await Promise.allSettled([
-        S.db.from('doctors').select('*,profiles:id(full_name,email),doctor_availability(day_of_week,start_time,end_time,is_active)').eq('is_verified',true).eq('is_accepting',true).order('rating',{ascending:false}),
+        S.db.from('doctors').select('*,profiles:id(full_name,email),doctor_availability(start_date,end_date,start_time,end_time,is_active)').eq('is_verified',true).eq('is_accepting',true).order('rating',{ascending:false}),
         S.db.from('courses').select('*').eq('is_active',true).order('sort_order'),
         S.db.from('compliance_requirements').select('*').eq('scope','global'),
         S.db.from('student_documents').select('*').eq('student_id',S.user.id).order('created_at',{ascending:false}),
@@ -1707,14 +1816,6 @@ async function saveDrProfile() {
     S.db.from('doctors').upsert({id:S.user.id,specialty:$('dp-spec')&&$('dp-spec').value,practice_name:$('dp-pr')&&$('dp-pr').value,practice_address:$('dp-addr')&&$('dp-addr').value,max_students:parseInt($('dp-mx')&&$('dp-mx').value)||2,bio:$('dp-bio')&&$('dp-bio').value,requirements:reqs})
   ]);
   toast('Profile saved!');
-}
-
-async function saveAvail() {
-  var slots=[];
-  document.querySelectorAll('.avail-btn').forEach(function(btn){ if(btn.textContent.trim()==='ON'){var t=btn.dataset.time;var eh=String(parseInt(t)+1).padStart(2,'0');slots.push({doctor_id:S.user.id,day_of_week:btn.dataset.day,start_time:t+':00',end_time:eh+':00:00',is_active:true});}});
-  await S.db.from('doctor_availability').delete().eq('doctor_id',S.user.id);
-  if (slots.length>0) await S.db.from('doctor_availability').insert(slots);
-  S.doctorAvail=slots; toast('Availability saved!');
 }
 
 async function adminVerifyStudent(id) {
@@ -1949,7 +2050,6 @@ function saveSettings() { toast('Settings saved!'); }
 
 
 function contentAdminAddDr() {
-  var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
   var specs = ['Cardiology','Orthopedics','Pediatrics','Emergency Medicine','Neurology','Surgery','Internal Medicine','Family Medicine','Radiology','Oncology','Anesthesiology'];
   return '<div class="section-hdr"><h2 class="section-title">Add Physician Directly</h2></div>' +
   '<div class="alert alert-info">💡 Admin-created physicians are automatically verified and go live immediately. They can log in with the password you set.</div>' +
@@ -1973,11 +2073,10 @@ function contentAdminAddDr() {
   '<div>' +
     '<div class="card" style="margin-bottom:1rem">' +
       '<h3 style="font-family:serif;margin-bottom:1rem">Initial Availability</h3>' +
-      '<p style="font-size:13px;color:#475569;margin-bottom:1rem">Days available for shadowing (8AM-12PM default). Physician can adjust from their dashboard.</p>' +
-      days.map(function(day){
-        return '<label style="display:flex;align-items:center;gap:10px;padding:8px;background:#F8FAFC;border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:14px;font-weight:500">' +
-        '<input type="checkbox" id="adr-day-'+day.toLowerCase()+'" style="width:auto;padding:0">'+day+'</label>';
-      }).join('') +
+      '<p style="font-size:13px;color:#475569;margin-bottom:1rem">Optional — set one starting day and time window. The physician can add more days from their own dashboard.</p>' +
+      '<div class="form-group"><label>Date</label><input type="date" id="adr-date"/></div>' +
+      '<div class="form-row"><div class="form-group"><label>Start Time</label><input type="time" id="adr-start-time" value="08:00"/></div>' +
+      '<div class="form-group"><label>End Time</label><input type="time" id="adr-end-time" value="12:00"/></div></div>' +
     '</div>' +
     '<div class="card">' +
       '<h3 style="font-family:serif;margin-bottom:1rem">Student Requirements</h3>' +
@@ -2042,10 +2141,8 @@ function contentAdminOpps() {
           '<p style="font-size:13px;color:#94A3B8;font-style:italic">No availability set — physician cannot be booked.</p>'
         :
           '<div style="display:flex;flex-wrap:wrap;gap:4px">' +
-          active.map(function(s){
-            return '<span style="background:#E0F5FA;color:#007A91;border-radius:4px;padding:3px 8px;font-size:12px;font-weight:600">' +
-              s.day_of_week.slice(0,3)+' '+s.start_time.slice(0,5)+'–'+s.end_time.slice(0,5)+
-            '</span>';
+          formatAvailTags(active).map(function(tag){
+            return '<span style="background:#E0F5FA;color:#007A91;border-radius:4px;padding:3px 8px;font-size:12px;font-weight:600">'+tag+'</span>';
           }).join('') +
           '</div>'
         ) +
@@ -2113,11 +2210,11 @@ function contentAdminSchedule() {
   '</tbody></table></div>';
 }
 
-// Open modal to add/edit physician availability slots
+// Open modal to add/edit a physician's availability windows (date range + time)
 function openOppModal(doctorId) {
   var doc = doctorId ? S.adminDoctors.find(function(d){return d.id===doctorId;}) : null;
   var allAvail = S.adminAvail || [];
-  var slots = doctorId ? allAvail.filter(function(a){return a.doctor_id===doctorId;}) : [];
+  var rows = sortWindows(doctorId ? allAvail.filter(function(a){return a.doctor_id===doctorId;}) : []);
 
   // If no doctorId, let admin pick a doctor
   var docSelect = doctorId ? '' :
@@ -2125,74 +2222,73 @@ function openOppModal(doctorId) {
     S.adminDoctors.map(function(d){return '<option value="'+d.id+'">'+(d.profiles&&d.profiles.full_name||d.id)+'</option>';}).join('') +
     '</select></div>';
 
-  var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-  var slots12 = ['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
-
   var body = docSelect +
-    '<div style="font-size:13px;font-weight:600;color:#475569;margin-bottom:8px">Select available time slots (click to toggle):</div>' +
-    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">' +
-    '<thead><tr><th style="padding:6px;text-align:left;color:#94A3B8">Time</th>' +
-    days.map(function(d){return '<th style="padding:6px;text-align:center;color:#94A3B8">'+d.slice(0,3)+'</th>';}).join('') +
-    '</tr></thead><tbody>' +
-    slots12.map(function(slot){
-      return '<tr><td style="padding:4px 6px;font-size:11px;font-weight:600;color:#475569;white-space:nowrap">'+slot+'</td>' +
-      days.map(function(day){
-        var isOn = slots.some(function(s){return s.day_of_week===day&&s.start_time&&s.start_time.slice(0,5)===slot&&s.is_active;});
-        return '<td style="text-align:center;padding:3px">' +
-          '<button class="avail-slot-btn" data-day="'+day+'" data-time="'+slot+'" onclick="toggleOppSlot(this)" style="width:40px;height:26px;border-radius:5px;border:none;cursor:pointer;font-size:10px;font-weight:700;background:'+(isOn?'#0098B4':'#E2E8F0')+';color:'+(isOn?'#fff':'#94A3B8')+'">' +
-            (isOn?'ON':'–') +
-          '</button>' +
-        '</td>';
-      }).join('') + '</tr>';
-    }).join('') +
-    '</tbody></table></div>' +
-    '<div id="opp-err" style="color:#DC2626;font-size:13px;margin-top:8px;display:none"></div>';
+    '<p style="font-size:13px;color:#475569;margin-bottom:10px">One shadowing opportunity per day. Picking a date that\'s already set updates its time instead of duplicating it.</p>' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-items:end;margin-bottom:1.25rem">' +
+      '<div class="form-group"><label>Date</label><input type="date" id="opp-date"/></div>' +
+      '<div class="form-group"><label>Start Time</label><input type="time" id="opp-start-time"/></div>' +
+      '<div class="form-group"><label>End Time</label><input type="time" id="opp-end-time"/></div>' +
+      '<button class="btn btn-primary btn-sm" onclick="adminAddAvailWindow(\''+(doctorId||'')+'\')">+ Save Day</button>' +
+    '</div>' +
+    '<div id="opp-err" style="color:#DC2626;font-size:13px;margin-bottom:8px;display:none"></div>' +
+    (rows.length===0 ?
+      '<p style="font-size:13px;color:#94A3B8;font-style:italic">No days set — physician cannot be booked.</p>'
+    :
+      '<div class="card" style="padding:0;overflow:hidden"><table><thead><tr><th>Date</th><th>Time</th><th></th></tr></thead><tbody>' +
+      rows.map(function(w){
+        var lbl = windowLabel(w);
+        return '<tr><td style="font-weight:600">'+lbl.dateLabel+'</td><td style="color:#475569">'+lbl.timeLabel+'</td>' +
+          '<td style="text-align:right"><button class="btn btn-sm btn-ghost" onclick="adminRemoveAvailWindow(\''+w.id+'\',\''+(doctorId||'')+'\')">✕ Remove</button></td></tr>';
+      }).join('') +
+      '</tbody></table></div>'
+    );
 
   showModal(
-    doc ? 'Edit Availability — '+(doc.profiles&&doc.profiles.full_name||'Physician') : 'Add Opportunity',
+    doc ? 'Availability — '+(doc.profiles&&doc.profiles.full_name||'Physician') : 'Add Opportunity',
     body,
-    function(){ saveOppSlots(doctorId); },
-    'Save Availability'
+    function(){ closeModal(); },
+    'Done'
   );
 }
 
-function toggleOppSlot(btn) {
-  var on = btn.textContent.trim() === 'ON';
-  btn.style.background = on ? '#E2E8F0' : '#0098B4';
-  btn.style.color = on ? '#94A3B8' : '#fff';
-  btn.textContent = on ? '–' : 'ON';
-}
-
-async function saveOppSlots(doctorId) {
+async function adminAddAvailWindow(doctorId) {
   var id = doctorId || ($('opp-dr-id') && $('opp-dr-id').value);
-  if (!id) { toast('Please select a physician','error'); return; }
+  var errEl = $('opp-err');
+  function showErr(msg){ if(errEl){errEl.style.display='block';errEl.textContent=msg;} }
+  if (errEl) errEl.style.display='none';
+  if (!id) { showErr('Please select a physician.'); return; }
 
-  var btn = $('modal-save-btn');
-  if(btn){btn.disabled=true;btn.textContent='Saving...';}
-
-  var slots = [];
-  document.querySelectorAll('.avail-slot-btn').forEach(function(b){
-    if (b.textContent.trim() === 'ON') {
-      var t = b.dataset.time;
-      var eh = String(parseInt(t)+1).padStart(2,'0');
-      slots.push({ doctor_id:id, day_of_week:b.dataset.day, start_time:t+':00', end_time:eh+':00:00', is_active:true });
-    }
-  });
+  var sd = $('opp-date') && $('opp-date').value;
+  var st = $('opp-start-time') && $('opp-start-time').value;
+  var et = $('opp-end-time') && $('opp-end-time').value;
+  if (!sd || !st || !et) { showErr('Please pick a date, start time, and end time.'); return; }
+  if (et <= st) { showErr('End time must be after start time.'); return; }
 
   try {
-    await S.db.from('doctor_availability').delete().eq('doctor_id', id);
-    if (slots.length > 0) {
-      var r = await S.db.from('doctor_availability').insert(slots);
+    var existing = (S.adminAvail||[]).find(function(a){ return a.doctor_id===id && a.start_date===sd; });
+    if (existing) {
+      var ru = await S.db.from('doctor_availability').update({ start_time:st+':00', end_time:et+':00', end_date:sd, is_active:true }).eq('id', existing.id);
+      if (ru.error) throw ru.error;
+    } else {
+      var row = { doctor_id:id, start_date:sd, end_date:sd, start_time:st+':00', end_time:et+':00', is_active:true };
+      var r = await S.db.from('doctor_availability').insert(row);
       if (r.error) throw r.error;
     }
     await refreshAdminOpps();
-    closeModal();
-    toast('Availability saved! '+slots.length+' slots active.');
+    openOppModal(id);
+    toast(existing ? 'Updated '+fmtDate(sd)+'!' : 'Added '+fmtDate(sd)+'!');
   } catch(e) {
-    var err = $('opp-err');
-    if(err){err.style.display='block';err.textContent=e.message||'Save failed.';}
-    if(btn){btn.disabled=false;btn.textContent='Save Availability';}
+    showErr(e.message||'Save failed.');
   }
+}
+
+async function adminRemoveAvailWindow(id, doctorId) {
+  try {
+    await S.db.from('doctor_availability').delete().eq('id', id);
+    await refreshAdminOpps();
+    openOppModal(doctorId || undefined);
+    toast('Day removed');
+  } catch(e) { toast(e.message||'Failed to remove day','error'); }
 }
 
 async function refreshAdminOpps() {
@@ -2349,12 +2445,12 @@ async function adminCreateDr() {
     var pm = {}; allProfiles.forEach(function(p){ pm[p.id]=p; });
     S.adminDoctors = allDoctors.map(function(d){ return Object.assign({},d,{profiles:pm[d.id]||{}}); });
 
-    // Step 5: Add default availability if days were selected
-    var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-    var selectedDays = days.filter(function(d){ var cb=$('adr-day-'+d.toLowerCase()); return cb&&cb.checked; });
-    if (selectedDays.length > 0) {
-      var slots = selectedDays.map(function(day){ return { doctor_id:uid, day_of_week:day, start_time:'08:00:00', end_time:'12:00:00', is_active:true }; });
-      await S.db.from('doctor_availability').insert(slots);
+    // Step 5: Add a default availability day if a date was provided
+    var iSd = $('adr-date') && $('adr-date').value;
+    var iSt = ($('adr-start-time') && $('adr-start-time').value) || '08:00';
+    var iEt = ($('adr-end-time') && $('adr-end-time').value) || '12:00';
+    if (iSd) {
+      await S.db.from('doctor_availability').insert({ doctor_id:uid, start_date:iSd, end_date:iSd, start_time:iSt+':00', end_time:iEt+':00', is_active:true });
     }
 
     setTab('admin-doctors');
