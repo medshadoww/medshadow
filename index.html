@@ -1625,11 +1625,11 @@ async function loadDashData() {
   try {
     if (S.role==='student') {
       var [dr,cr,cm,docs,enr] = await Promise.allSettled([
-        S.db.from('doctors').select('*,profiles:id(full_name,email),doctor_availability(start_date,end_date,start_time,end_time,is_active)').eq('is_verified',true).eq('is_accepting',true).order('rating',{ascending:false}),
+        S.db.from('doctors').select('*,profiles:profiles!doctors_id_fkey(full_name,email),doctor_availability!doctor_availability_doctor_id_fkey(start_date,end_date,start_time,end_time,is_active)').eq('is_verified',true).eq('is_accepting',true).order('rating',{ascending:false}),
         S.db.from('courses').select('*').eq('is_active',true).order('sort_order'),
         S.db.from('compliance_requirements').select('*').eq('scope','global'),
         S.db.from('student_documents').select('*').eq('student_id',S.user.id).order('created_at',{ascending:false}),
-        S.db.from('shadowing_enrollments').select('*,doctors:doctor_id(specialty,practice_name,profiles:id(full_name))').eq('student_id',S.user.id).order('session_date',{ascending:false}),
+        S.db.from('shadowing_enrollments').select('*,doctors:doctor_id(specialty,practice_name,profiles:profiles!doctors_id_fkey(full_name))').eq('student_id',S.user.id).order('session_date',{ascending:false}),
       ]);
       S.doctors    = dr.status==='fulfilled'&&dr.value.data   ? dr.value.data   : [];
       S.courses    = cr.status==='fulfilled'&&cr.value.data   ? cr.value.data   : [];
@@ -1718,7 +1718,7 @@ async function enrollDoc(doctorId, name) {
   try {
     var d=new Date(); d.setDate(d.getDate()+(8-d.getDay())%7||7);
     await S.db.from('shadowing_enrollments').insert({student_id:S.user.id,doctor_id:doctorId,session_date:d.toISOString().split('T')[0],start_time:'08:00',end_time:'12:00',status:'pending'});
-    S.enrollments = (await S.db.from('shadowing_enrollments').select('*,doctors:doctor_id(specialty,practice_name,profiles:id(full_name))').eq('student_id',S.user.id).order('session_date',{ascending:false})).data || [];
+    S.enrollments = (await S.db.from('shadowing_enrollments').select('*,doctors:doctor_id(specialty,practice_name,profiles:profiles!doctors_id_fkey(full_name))').eq('student_id',S.user.id).order('session_date',{ascending:false})).data || [];
     toast('Enrollment request sent to '+name+'! Awaiting approval.');
   } catch(e) { toast(e.message||'Enrollment failed','error'); }
 }
